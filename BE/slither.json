@@ -1,0 +1,492 @@
+{
+  "success": true,
+  "error": null,
+  "results": {
+    "detectors": [
+      {
+        "elements": [
+          {
+            "type": "function",
+            "name": "withdraw",
+            "source_mapping": {
+              "start": 231,
+              "length": 221,
+              "filename_relative": "contracts/high-risk.sol",
+              "filename_absolute": "C:/Users/imamu/Documents/Programming/HackAthon/BI OJK/auto-sentinel/BE/contracts/high-risk.sol",
+              "filename_short": "contracts/high-risk.sol",
+              "is_dependency": false,
+              "lines": [
+                11,
+                12,
+                13,
+                14,
+                15,
+                16
+              ],
+              "starting_column": 5,
+              "ending_column": 6
+            },
+            "type_specific_fields": {
+              "parent": {
+                "type": "contract",
+                "name": "Reentrant",
+                "source_mapping": {
+                  "start": 60,
+                  "length": 481,
+                  "filename_relative": "contracts/high-risk.sol",
+                  "filename_absolute": "C:/Users/imamu/Documents/Programming/HackAthon/BI OJK/auto-sentinel/BE/contracts/high-risk.sol",
+                  "filename_short": "contracts/high-risk.sol",
+                  "is_dependency": false,
+                  "lines": [
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20,
+                    21
+                  ],
+                  "starting_column": 1,
+                  "ending_column": 2
+                }
+              },
+              "signature": "withdraw()"
+            }
+          },
+          {
+            "type": "node",
+            "name": "(success,None) = msg.sender.call{value: balances[msg.sender]}()",
+            "source_mapping": {
+              "start": 315,
+              "length": 67,
+              "filename_relative": "contracts/high-risk.sol",
+              "filename_absolute": "C:/Users/imamu/Documents/Programming/HackAthon/BI OJK/auto-sentinel/BE/contracts/high-risk.sol",
+              "filename_short": "contracts/high-risk.sol",
+              "is_dependency": false,
+              "lines": [
+                13
+              ],
+              "starting_column": 9,
+              "ending_column": 76
+            },
+            "type_specific_fields": {
+              "parent": {
+                "type": "function",
+                "name": "withdraw",
+                "source_mapping": {
+                  "start": 231,
+                  "length": 221,
+                  "filename_relative": "contracts/high-risk.sol",
+                  "filename_absolute": "C:/Users/imamu/Documents/Programming/HackAthon/BI OJK/auto-sentinel/BE/contracts/high-risk.sol",
+                  "filename_short": "contracts/high-risk.sol",
+                  "is_dependency": false,
+                  "lines": [
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16
+                  ],
+                  "starting_column": 5,
+                  "ending_column": 6
+                },
+                "type_specific_fields": {
+                  "parent": {
+                    "type": "contract",
+                    "name": "Reentrant",
+                    "source_mapping": {
+                      "start": 60,
+                      "length": 481,
+                      "filename_relative": "contracts/high-risk.sol",
+                      "filename_absolute": "C:/Users/imamu/Documents/Programming/HackAthon/BI OJK/auto-sentinel/BE/contracts/high-risk.sol",
+                      "filename_short": "contracts/high-risk.sol",
+                      "is_dependency": false,
+                      "lines": [
+                        4,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10,
+                        11,
+                        12,
+                        13,
+                        14,
+                        15,
+                        16,
+                        17,
+                        18,
+                        19,
+                        20,
+                        21
+                      ],
+                      "starting_column": 1,
+                      "ending_column": 2
+                    }
+                  },
+                  "signature": "withdraw()"
+                }
+              }
+            },
+            "additional_fields": {
+              "underlying_type": "external_calls"
+            }
+          },
+          {
+            "type": "node",
+            "name": "balances[msg.sender] = 0",
+            "source_mapping": {
+              "start": 420,
+              "length": 24,
+              "filename_relative": "contracts/high-risk.sol",
+              "filename_absolute": "C:/Users/imamu/Documents/Programming/HackAthon/BI OJK/auto-sentinel/BE/contracts/high-risk.sol",
+              "filename_short": "contracts/high-risk.sol",
+              "is_dependency": false,
+              "lines": [
+                15
+              ],
+              "starting_column": 9,
+              "ending_column": 33
+            },
+            "type_specific_fields": {
+              "parent": {
+                "type": "function",
+                "name": "withdraw",
+                "source_mapping": {
+                  "start": 231,
+                  "length": 221,
+                  "filename_relative": "contracts/high-risk.sol",
+                  "filename_absolute": "C:/Users/imamu/Documents/Programming/HackAthon/BI OJK/auto-sentinel/BE/contracts/high-risk.sol",
+                  "filename_short": "contracts/high-risk.sol",
+                  "is_dependency": false,
+                  "lines": [
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16
+                  ],
+                  "starting_column": 5,
+                  "ending_column": 6
+                },
+                "type_specific_fields": {
+                  "parent": {
+                    "type": "contract",
+                    "name": "Reentrant",
+                    "source_mapping": {
+                      "start": 60,
+                      "length": 481,
+                      "filename_relative": "contracts/high-risk.sol",
+                      "filename_absolute": "C:/Users/imamu/Documents/Programming/HackAthon/BI OJK/auto-sentinel/BE/contracts/high-risk.sol",
+                      "filename_short": "contracts/high-risk.sol",
+                      "is_dependency": false,
+                      "lines": [
+                        4,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10,
+                        11,
+                        12,
+                        13,
+                        14,
+                        15,
+                        16,
+                        17,
+                        18,
+                        19,
+                        20,
+                        21
+                      ],
+                      "starting_column": 1,
+                      "ending_column": 2
+                    }
+                  },
+                  "signature": "withdraw()"
+                }
+              }
+            },
+            "additional_fields": {
+              "underlying_type": "variables_written",
+              "variable_name": "balances"
+            }
+          }
+        ],
+        "description": "Reentrancy in Reentrant.withdraw() (contracts/high-risk.sol#11-16):\n\tExternal calls:\n\t- (success,None) = msg.sender.call{value: balances[msg.sender]}() (contracts/high-risk.sol#13)\n\tState variables written after the call(s):\n\t- balances[msg.sender] = 0 (contracts/high-risk.sol#15)\n\tReentrant.balances (contracts/high-risk.sol#5) can be used in cross function reentrancies:\n\t- Reentrant.balances (contracts/high-risk.sol#5)\n\t- Reentrant.deposit() (contracts/high-risk.sol#7-9)\n\t- Reentrant.withdraw() (contracts/high-risk.sol#11-16)\n",
+        "markdown": "Reentrancy in [Reentrant.withdraw()](contracts/high-risk.sol#L11-L16):\n\tExternal calls:\n\t- [(success,None) = msg.sender.call{value: balances[msg.sender]}()](contracts/high-risk.sol#L13)\n\tState variables written after the call(s):\n\t- [balances[msg.sender] = 0](contracts/high-risk.sol#L15)\n\t[Reentrant.balances](contracts/high-risk.sol#L5) can be used in cross function reentrancies:\n\t- [Reentrant.balances](contracts/high-risk.sol#L5)\n\t- [Reentrant.deposit()](contracts/high-risk.sol#L7-L9)\n\t- [Reentrant.withdraw()](contracts/high-risk.sol#L11-L16)\n",
+        "first_markdown_element": "contracts/high-risk.sol#L11-L16",
+        "id": "37eec074009cd8d3b2da9a6b16d52c70588caeb064735f084c413cddb386602c",
+        "check": "reentrancy-eth",
+        "impact": "High",
+        "confidence": "Medium"
+      },
+      {
+        "elements": [
+          {
+            "type": "function",
+            "name": "rugPull",
+            "source_mapping": {
+              "start": 460,
+              "length": 78,
+              "filename_relative": "contracts/high-risk.sol",
+              "filename_absolute": "C:/Users/imamu/Documents/Programming/HackAthon/BI OJK/auto-sentinel/BE/contracts/high-risk.sol",
+              "filename_short": "contracts/high-risk.sol",
+              "is_dependency": false,
+              "lines": [
+                18,
+                19,
+                20
+              ],
+              "starting_column": 5,
+              "ending_column": 6
+            },
+            "type_specific_fields": {
+              "parent": {
+                "type": "contract",
+                "name": "Reentrant",
+                "source_mapping": {
+                  "start": 60,
+                  "length": 481,
+                  "filename_relative": "contracts/high-risk.sol",
+                  "filename_absolute": "C:/Users/imamu/Documents/Programming/HackAthon/BI OJK/auto-sentinel/BE/contracts/high-risk.sol",
+                  "filename_short": "contracts/high-risk.sol",
+                  "is_dependency": false,
+                  "lines": [
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20,
+                    21
+                  ],
+                  "starting_column": 1,
+                  "ending_column": 2
+                }
+              },
+              "signature": "rugPull()"
+            }
+          }
+        ],
+        "description": "Reentrant.rugPull() (contracts/high-risk.sol#18-20) allows anyone to destruct the contract\n",
+        "markdown": "[Reentrant.rugPull()](contracts/high-risk.sol#L18-L20) allows anyone to destruct the contract\n",
+        "first_markdown_element": "contracts/high-risk.sol#L18-L20",
+        "id": "7661940e9e58beac7b63e2b3685e8468d0d8c65f0fb3ea68896ac4ce4e5bb4ab",
+        "check": "suicidal",
+        "impact": "High",
+        "confidence": "High"
+      },
+      {
+        "elements": [
+          {
+            "type": "pragma",
+            "name": "^0.8.0",
+            "source_mapping": {
+              "start": 33,
+              "length": 23,
+              "filename_relative": "contracts/high-risk.sol",
+              "filename_absolute": "C:/Users/imamu/Documents/Programming/HackAthon/BI OJK/auto-sentinel/BE/contracts/high-risk.sol",
+              "filename_short": "contracts/high-risk.sol",
+              "is_dependency": false,
+              "lines": [
+                2
+              ],
+              "starting_column": 1,
+              "ending_column": 24
+            },
+            "type_specific_fields": {
+              "directive": [
+                "solidity",
+                "^",
+                "0.8",
+                ".0"
+              ]
+            }
+          }
+        ],
+        "description": "Version constraint ^0.8.0 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- FullInlinerNonExpressionSplitArgumentEvaluationOrder\n\t- MissingSideEffectsOnSelectorAccess\n\t- AbiReencodingHeadOverflowWithStaticArrayCleanup\n\t- DirtyBytesArrayToStorage\n\t- DataLocationChangeInInternalOverride\n\t- NestedCalldataArrayAbiReencodingSizeValidation\n\t- SignedImmutables\n\t- ABIDecodeTwoDimensionalArrayMemory\n\t- KeccakCaching.\nIt is used by:\n\t- ^0.8.0 (contracts/high-risk.sol#2)\n",
+        "markdown": "Version constraint ^0.8.0 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- FullInlinerNonExpressionSplitArgumentEvaluationOrder\n\t- MissingSideEffectsOnSelectorAccess\n\t- AbiReencodingHeadOverflowWithStaticArrayCleanup\n\t- DirtyBytesArrayToStorage\n\t- DataLocationChangeInInternalOverride\n\t- NestedCalldataArrayAbiReencodingSizeValidation\n\t- SignedImmutables\n\t- ABIDecodeTwoDimensionalArrayMemory\n\t- KeccakCaching.\nIt is used by:\n\t- [^0.8.0](contracts/high-risk.sol#L2)\n",
+        "first_markdown_element": "contracts/high-risk.sol#L2",
+        "id": "fd90ca54c23d4614734567df35809bed1f159ef8b7f50e97e03290cd17776445",
+        "check": "solc-version",
+        "impact": "Informational",
+        "confidence": "High"
+      },
+      {
+        "elements": [
+          {
+            "type": "function",
+            "name": "withdraw",
+            "source_mapping": {
+              "start": 231,
+              "length": 221,
+              "filename_relative": "contracts/high-risk.sol",
+              "filename_absolute": "C:/Users/imamu/Documents/Programming/HackAthon/BI OJK/auto-sentinel/BE/contracts/high-risk.sol",
+              "filename_short": "contracts/high-risk.sol",
+              "is_dependency": false,
+              "lines": [
+                11,
+                12,
+                13,
+                14,
+                15,
+                16
+              ],
+              "starting_column": 5,
+              "ending_column": 6
+            },
+            "type_specific_fields": {
+              "parent": {
+                "type": "contract",
+                "name": "Reentrant",
+                "source_mapping": {
+                  "start": 60,
+                  "length": 481,
+                  "filename_relative": "contracts/high-risk.sol",
+                  "filename_absolute": "C:/Users/imamu/Documents/Programming/HackAthon/BI OJK/auto-sentinel/BE/contracts/high-risk.sol",
+                  "filename_short": "contracts/high-risk.sol",
+                  "is_dependency": false,
+                  "lines": [
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9,
+                    10,
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16,
+                    17,
+                    18,
+                    19,
+                    20,
+                    21
+                  ],
+                  "starting_column": 1,
+                  "ending_column": 2
+                }
+              },
+              "signature": "withdraw()"
+            }
+          },
+          {
+            "type": "node",
+            "name": "(success,None) = msg.sender.call{value: balances[msg.sender]}()",
+            "source_mapping": {
+              "start": 315,
+              "length": 67,
+              "filename_relative": "contracts/high-risk.sol",
+              "filename_absolute": "C:/Users/imamu/Documents/Programming/HackAthon/BI OJK/auto-sentinel/BE/contracts/high-risk.sol",
+              "filename_short": "contracts/high-risk.sol",
+              "is_dependency": false,
+              "lines": [
+                13
+              ],
+              "starting_column": 9,
+              "ending_column": 76
+            },
+            "type_specific_fields": {
+              "parent": {
+                "type": "function",
+                "name": "withdraw",
+                "source_mapping": {
+                  "start": 231,
+                  "length": 221,
+                  "filename_relative": "contracts/high-risk.sol",
+                  "filename_absolute": "C:/Users/imamu/Documents/Programming/HackAthon/BI OJK/auto-sentinel/BE/contracts/high-risk.sol",
+                  "filename_short": "contracts/high-risk.sol",
+                  "is_dependency": false,
+                  "lines": [
+                    11,
+                    12,
+                    13,
+                    14,
+                    15,
+                    16
+                  ],
+                  "starting_column": 5,
+                  "ending_column": 6
+                },
+                "type_specific_fields": {
+                  "parent": {
+                    "type": "contract",
+                    "name": "Reentrant",
+                    "source_mapping": {
+                      "start": 60,
+                      "length": 481,
+                      "filename_relative": "contracts/high-risk.sol",
+                      "filename_absolute": "C:/Users/imamu/Documents/Programming/HackAthon/BI OJK/auto-sentinel/BE/contracts/high-risk.sol",
+                      "filename_short": "contracts/high-risk.sol",
+                      "is_dependency": false,
+                      "lines": [
+                        4,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10,
+                        11,
+                        12,
+                        13,
+                        14,
+                        15,
+                        16,
+                        17,
+                        18,
+                        19,
+                        20,
+                        21
+                      ],
+                      "starting_column": 1,
+                      "ending_column": 2
+                    }
+                  },
+                  "signature": "withdraw()"
+                }
+              }
+            }
+          }
+        ],
+        "description": "Low level call in Reentrant.withdraw() (contracts/high-risk.sol#11-16):\n\t- (success,None) = msg.sender.call{value: balances[msg.sender]}() (contracts/high-risk.sol#13)\n",
+        "markdown": "Low level call in [Reentrant.withdraw()](contracts/high-risk.sol#L11-L16):\n\t- [(success,None) = msg.sender.call{value: balances[msg.sender]}()](contracts/high-risk.sol#L13)\n",
+        "first_markdown_element": "contracts/high-risk.sol#L11-L16",
+        "id": "19fc7ed1c53feb0b667f33d7bf2d6c1a05edc1863b25930cee6cab59c72e1f7a",
+        "check": "low-level-calls",
+        "impact": "Informational",
+        "confidence": "High"
+      }
+    ]
+  }
+}
