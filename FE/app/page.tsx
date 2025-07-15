@@ -32,6 +32,10 @@ const ContractSafetyChecker = () => {
     informational_issues: number;
     code_quality_score: number;
     security_score: number;
+    trust_score: number;
+    contract_age_days: number;
+    transaction_count: number;
+    unique_users: number;
   }
 
   interface AuditData {
@@ -46,6 +50,10 @@ const ContractSafetyChecker = () => {
     recommendations: string[];
     gas_optimization_hints: string[];
     audit_file_path: string;
+    contract_info: ContractInfo;
+    ownership_analysis: OwnershipAnalysis;
+    trading_analysis: TradingAnalysis;
+    social_presence: SocialPresence;
   }
 
   interface HistoryItem {
@@ -53,6 +61,43 @@ const ContractSafetyChecker = () => {
     total_issues: number;
     file_path: string;
   }
+
+  interface ContractInfo {
+    is_verified: boolean;
+    verification_date?: string;
+    compiler_version?: string;
+    contract_name?: string;
+    proxy_type?: string;
+    implementation_address?: string;
+  }
+
+  interface OwnershipAnalysis {
+    owner_address?: string;
+    is_multisig: boolean;
+    ownership_renounced: boolean;
+    admin_functions: string[];
+    centralization_risk: string; // Low, Medium, High
+  }
+
+  interface TradingAnalysis {
+    is_honeypot: boolean;
+    honeypot_confidence: number;
+    buy_tax?: number;
+    sell_tax?: number;
+    liquidity_locked: boolean;
+    trading_enabled: boolean;
+    max_transaction_limit?: string;
+  }
+
+  interface SocialPresence {
+    website?: string;
+    twitter?: string;
+    telegram?: string;
+    github?: string;
+    discord?: string;
+    social_score: number;
+  }
+
 
   const checkContract = async () => {
     if (!address.trim()) {
@@ -159,47 +204,109 @@ const ContractSafetyChecker = () => {
   };
 
   const getUserRecommendation = (risk?: string): string => {
-    switch (risk?.toLowerCase()) {
-      case 'low': return "This contract appears safe to interact with. No major security risks detected.";
-      case 'medium': return "Exercise caution when using this contract. Some security concerns were found.";
-      case 'high': return "High risk detected! Only interact with this contract if you understand the risks.";
-      case 'critical': return "DO NOT USE this contract! Critical security flaws could result in loss of funds.";
-      default: return "Unable to determine safety level. Exercise extreme caution.";
-    }
-  };
+  switch (risk?.toLowerCase()) {
+    case 'low': return "This contract appears safe to interact with. No major security risks detected.";
+    case 'medium': return "Exercise caution when using this contract. Some security concerns were found.";
+    case 'high': return "High risk detected! Only interact with this contract if you understand the risks.";
+    case 'critical': return "DO NOT USE this contract! Critical security flaws could result in loss of funds.";
+    default: return "Unable to determine safety level. Exercise extreme caution.";
+  }
+};
 
-  const getUserFriendlyVuln = (vuln: VulnerabilityDetail) => {
-    const userFriendlyTypes: Record<string, string> = {
-      'reentrancy-eth': 'Reentrancy Attack Risk',
-      'tx-origin': 'Unsafe Authentication',
-      'unchecked-transfer': 'Unchecked Token Transfers',
-      'uninitialized-state': 'Uninitialized Variables',
-      'locked-ether': 'Trapped Funds Risk',
-      'arbitrary-send': 'Arbitrary Fund Transfer',
-      'controlled-array-length': 'Gas Limit Issues',
-      'timestamp': 'Time Manipulation Risk',
-      'weak-prng': 'Predictable Randomness',
-      'suicidal': 'Contract Self-Destruct Risk'
-    };
-
-    const userImpacts: Record<string, string> = {
-      'reentrancy-eth': 'Attackers could drain funds by repeatedly calling withdrawal functions',
-      'tx-origin': 'Your transactions could be authorized by malicious contracts',
-      'unchecked-transfer': 'Failed token transfers might not be detected, causing loss',
-      'uninitialized-state': 'Contract behavior might be unpredictable',
-      'locked-ether': 'Any ETH sent to this contract could be permanently stuck',
-      'arbitrary-send': 'Contract owners can redirect your funds anywhere',
-      'controlled-array-length': 'Transactions might fail due to gas limits',
-      'timestamp': 'Time-based features can be manipulated by miners',
-      'weak-prng': 'Random outcomes can be predicted and exploited',
-      'suicidal': 'The contract can be destroyed, making your tokens worthless'
-    };
-
+const getVerificationStatus = (contractInfo: ContractInfo) => {
+  if (contractInfo.is_verified) {
     return {
-      friendlyName: userFriendlyTypes[vuln.type] || vuln.type,
-      userImpact: userImpacts[vuln.type] || vuln.description
+      status: "✅ Verified",
+      color: "text-emerald-400",
+      bgColor: "bg-emerald-500/20",
+      borderColor: "border-emerald-500/30"
     };
+  }
+  return {
+    status: "❌ Not Verified",
+    color: "text-red-400",
+    bgColor: "bg-red-500/20",
+    borderColor: "border-red-500/30"
   };
+};
+
+const getHoneypotStatus = (tradingAnalysis: TradingAnalysis) => {
+  if (tradingAnalysis.is_honeypot) {
+    return {
+      status: "🚨 HONEYPOT DETECTED",
+      color: "text-red-500",
+      bgColor: "bg-red-500/20",
+      borderColor: "border-red-500/30",
+      description: `High confidence (${(tradingAnalysis.honeypot_confidence * 100).toFixed(1)}%) this is a honeypot contract`
+    };
+  }
+  return {
+    status: "✅ No Honeypot Detected",
+    color: "text-emerald-400",
+    bgColor: "bg-emerald-500/20",
+    borderColor: "border-emerald-500/30",
+    description: "Contract appears safe from honeypot characteristics"
+  };
+};
+
+const getOwnershipRisk = (ownershipAnalysis: OwnershipAnalysis) => {
+  const risk = ownershipAnalysis.centralization_risk.toLowerCase();
+
+  if (risk === 'high') {
+    return {
+      status: "🚨 High Centralization Risk",
+      color: "text-red-400",
+      bgColor: "bg-red-500/20",
+      borderColor: "border-red-500/30"
+    };
+  } else if (risk === 'medium') {
+    return {
+      status: "⚠️ Medium Centralization Risk",
+      color: "text-amber-400",
+      bgColor: "bg-amber-500/20",
+      borderColor: "border-amber-500/30"
+    };
+  }
+  return {
+    status: "✅ Low Centralization Risk",
+    color: "text-emerald-400",
+    bgColor: "bg-emerald-500/20",
+    borderColor: "border-emerald-500/30"
+  };
+};
+
+const getUserFriendlyVuln = (vuln: VulnerabilityDetail) => {
+  const userFriendlyTypes: Record<string, string> = {
+    'reentrancy-eth': 'Reentrancy Attack Risk',
+    'tx-origin': 'Unsafe Authentication',
+    'unchecked-transfer': 'Unchecked Token Transfers',
+    'uninitialized-state': 'Uninitialized Variables',
+    'locked-ether': 'Trapped Funds Risk',
+    'arbitrary-send': 'Arbitrary Fund Transfer',
+    'controlled-array-length': 'Gas Limit Issues',
+    'timestamp': 'Time Manipulation Risk',
+    'weak-prng': 'Predictable Randomness',
+    'suicidal': 'Contract Self-Destruct Risk'
+  };
+
+  const userImpacts: Record<string, string> = {
+    'reentrancy-eth': 'Attackers could drain funds by repeatedly calling withdrawal functions',
+    'tx-origin': 'Your transactions could be authorized by malicious contracts',
+    'unchecked-transfer': 'Failed token transfers might not be detected, causing loss',
+    'uninitialized-state': 'Contract behavior might be unpredictable',
+    'locked-ether': 'Any ETH sent to this contract could be permanently stuck',
+    'arbitrary-send': 'Contract owners can redirect your funds anywhere',
+    'controlled-array-length': 'Transactions might fail due to gas limits',
+    'timestamp': 'Time-based features can be manipulated by miners',
+    'weak-prng': 'Random outcomes can be predicted and exploited',
+    'suicidal': 'The contract can be destroyed, making your tokens worthless'
+  };
+
+  return {
+    friendlyName: userFriendlyTypes[vuln.type] || vuln.type,
+    userImpact: userImpacts[vuln.type] || vuln.description
+  };
+};
 
   const RiskGauge: React.FC<{ score: number; label: string }> = ({ score, label }) => {
     const circumference = 2 * Math.PI * 45;
@@ -307,6 +414,7 @@ const ContractSafetyChecker = () => {
             <span className="bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
               Auto Sentinel
             </span>
+            ✌️
           </h1>
 
           <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed font-light">
@@ -455,8 +563,8 @@ const ContractSafetyChecker = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {[
                       { address: "0xef9f4c0c3403d269c867c908e7f66748cc17f28a", name: "Low Risk Contract", risk: "SAFE", color: "emerald", icon: CheckCircle },
-                      { address: "0xbbe4301e96961e3f0cb0d75eb1a1dbf982e8e59d", name: "Medium Risk Contract", risk: "CAUTION", color: "amber", icon: AlertTriangle },
-                      { address: "0x0482a1e0d4e4f2628d27ec60112bd86b773de80a", name: "High Risk Contract", risk: "DANGER", color: "red", icon: XCircle }
+                      { address: "0x08910C71bf5f36725842d0d5747f7894ffe88858", name: "Medium Risk Contract", risk: "CAUTION", color: "amber", icon: AlertTriangle },
+                      { address: "0x82340b6138Cf09Fa8008A44c50C691C89cdfF495", name: "High Risk Contract", risk: "DANGER", color: "red", icon: XCircle }
                     ].map(({ address: addr, name, risk, color, icon: Icon }, i) => (
                       <button
                         key={i}
@@ -506,8 +614,15 @@ const ContractSafetyChecker = () => {
             </div>
 
             {/* Threat Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
               {[
+                {
+                  title: "Trust Score",
+                  value: `${auditData.security_metrics.trust_score}/100`,
+                  icon: Award,
+                  color: auditData.security_metrics.trust_score >= 70 ? "text-emerald-400" : auditData.security_metrics.trust_score >= 50 ? "text-amber-400" : "text-red-400",
+                  gradient: auditData.security_metrics.trust_score >= 70 ? "from-emerald-400 to-green-500" : auditData.security_metrics.trust_score >= 50 ? "from-amber-400 to-orange-500" : "from-red-400 to-red-600"
+                },
                 {
                   title: "Threat Level",
                   value: auditData.risk_level.toUpperCase(),
@@ -532,15 +647,16 @@ const ContractSafetyChecker = () => {
                 {
                   title: "Security Score",
                   value: `${auditData.security_metrics.security_score}/100`,
-                  icon: Award,
+                  icon: CheckCircle,
                   color: "text-emerald-400",
                   gradient: "from-emerald-400 to-green-500"
                 }
               ].map(({ title, value, icon: Icon, color, gradient }, i) => (
                 <div key={i} className="bg-gray-800/50 backdrop-blur-xl rounded-2xl p-8 border-gray-700/50 shadow-xl hover:scale-105 transition-all duration-300 group">
                   <div className="flex items-center justify-between mb-6">
-                    <div className={`p-4 rounded-xl bg-gradient-to-r ${gradient} bg-opacity-20 border-white/10`}>
-                      <Icon className={`w-8 h-8 ${color}`} />
+                    <div className={`p-4 rounded-xl bg-gradient-to-r ${gradient} bg-opacity-20 border-white/10 relative`}>
+                      <div className="absolute inset-0 bg-gray-900/100 rounded-xl"></div>
+                      <Icon className={`w-8 h-8 ${color} relative z-10`} />
                     </div>
                     <div className={`text-3xl font-bold ${color}`}>{value}</div>
                   </div>
@@ -553,25 +669,166 @@ const ContractSafetyChecker = () => {
             <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl p-10 border-gray-700/50 shadow-xl">
               <h3 className="text-3xl font-bold text-white mb-12 text-center flex items-center justify-center">
                 <Activity className="w-8 h-8 mr-4 text-blue-400" />
-                Threat Analysis Metrics
+                Enhanced Security Metrics
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+                <RiskGauge score={auditData.security_metrics.trust_score} label="Trust Score" />
                 <RiskGauge score={auditData.security_metrics.security_score} label="Security Score" />
                 <RiskGauge score={auditData.security_metrics.code_quality_score} label="Code Quality" />
-                <RiskGauge score={auditData.risk_score} label="Overall Safety" />
+                <RiskGauge score={auditData.social_presence.social_score} label="Social Score" />
               </div>
             </div>
 
             {/* AI Threat Analysis */}
-            <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl p-10 border-gray-700/50 shadow-xl">
+            <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl p-10 border border-gray-700/50 shadow-xl">
               <h3 className="text-3xl font-bold text-white mb-8 flex items-center">
                 <Brain className="w-8 h-8 mr-4 text-purple-400" />
                 AI Threat Analysis Report
               </h3>
-              <div className="bg-gradient-to-r from-blue-500/10 to-purple-600/10 rounded-xl p-8 border-blue-500/20 backdrop-blur-sm">
-                <p className="text-gray-200 leading-relaxed text-lg whitespace-pre-line">{auditData.ai_summary}</p>
+              <div className="bg-gradient-to-r from-blue-500/10 to-purple-600/10 rounded-xl p-8 border border-blue-500/20 backdrop-blur-sm text-gray-200 text-base leading-relaxed space-y-6">
+                <div
+                  dangerouslySetInnerHTML={{ __html: auditData.ai_summary }}
+                />
               </div>
             </div>
+
+            {/* Enhanced Security Indicators */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Contract Verification Status */}
+              <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl p-8 border-gray-700/50 shadow-xl">
+                <div className="flex items-center justify-between mb-6">
+                  <h4 className="text-xl font-bold text-white flex items-center">
+                    <CheckCircle className="w-6 h-6 mr-3 text-blue-400" />
+                    Contract Verification
+                  </h4>
+                </div>
+
+                <div className={`p-6 rounded-xl ${getVerificationStatus(auditData.contract_info).bgColor} ${getVerificationStatus(auditData.contract_info).borderColor} border backdrop-blur-sm`}>
+                  <p className={`font-bold text-xl mb-2 ${getVerificationStatus(auditData.contract_info).color}`}>
+                    {getVerificationStatus(auditData.contract_info).status}
+                  </p>
+                  {auditData.contract_info.contract_name && (
+                    <p className="text-gray-300 mb-2">
+                      <strong>Name:</strong> {auditData.contract_info.contract_name}
+                    </p>
+                  )}
+                  {auditData.contract_info.compiler_version && (
+                    <p className="text-gray-300">
+                      <strong>Compiler:</strong> {auditData.contract_info.compiler_version}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Honeypot Detection */}
+              <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl p-8 border-gray-700/50 shadow-xl">
+                <div className="flex items-center justify-between mb-6">
+                  <h4 className="text-xl font-bold text-white flex items-center">
+                    <AlertTriangle className="w-6 h-6 mr-3 text-amber-400" />
+                    Honeypot Detection
+                  </h4>
+                </div>
+
+                <div className={`p-6 rounded-xl ${getHoneypotStatus(auditData.trading_analysis).bgColor} ${getHoneypotStatus(auditData.trading_analysis).borderColor} border backdrop-blur-sm`}>
+                  <p className={`font-bold text-xl mb-2 ${getHoneypotStatus(auditData.trading_analysis).color}`}>
+                    {getHoneypotStatus(auditData.trading_analysis).status}
+                  </p>
+                  <p className="text-gray-300 text-sm">
+                    {getHoneypotStatus(auditData.trading_analysis).description}
+                  </p>
+                  {auditData.trading_analysis.buy_tax !== null && (
+                    <div className="mt-4 space-y-1">
+                      <p className="text-gray-300 text-sm">
+                        <strong>Buy Tax:</strong> {auditData.trading_analysis.buy_tax ? `${auditData.trading_analysis.buy_tax}%` : 'Unknown'}
+                      </p>
+                      <p className="text-gray-300 text-sm">
+                        <strong>Sell Tax:</strong> {auditData.trading_analysis.sell_tax ? `${auditData.trading_analysis.sell_tax}%` : 'Unknown'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Ownership Analysis */}
+              <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl p-8 border-gray-700/50 shadow-xl">
+                <div className="flex items-center justify-between mb-6">
+                  <h4 className="text-xl font-bold text-white flex items-center">
+                    <Users className="w-6 h-6 mr-3 text-purple-400" />
+                    Ownership Analysis
+                  </h4>
+                </div>
+
+                <div className={`p-6 rounded-xl ${getOwnershipRisk(auditData.ownership_analysis).bgColor} ${getOwnershipRisk(auditData.ownership_analysis).borderColor} border backdrop-blur-sm`}>
+                  <p className={`font-bold text-xl mb-4 ${getOwnershipRisk(auditData.ownership_analysis).color}`}>
+                    {getOwnershipRisk(auditData.ownership_analysis).status}
+                  </p>
+
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center">
+                      <span className="text-gray-400 w-20">Multisig:</span>
+                      <span className={auditData.ownership_analysis.is_multisig ? "text-emerald-400" : "text-red-400"}>
+                        {auditData.ownership_analysis.is_multisig ? "✅ Yes" : "❌ No"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center">
+                      <span className="text-gray-400 w-20">Renounced:</span>
+                      <span className={auditData.ownership_analysis.ownership_renounced ? "text-emerald-400" : "text-amber-400"}>
+                        {auditData.ownership_analysis.ownership_renounced ? "✅ Yes" : "⚠️ No"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center">
+                      <span className="text-gray-400 w-20">Admin Funcs:</span>
+                      <span className="text-gray-300">
+                        {auditData.ownership_analysis.admin_functions.length} found
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Contract Statistics */}
+            <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl p-10 border-gray-700/50 shadow-xl">
+              <h3 className="text-3xl font-bold text-white mb-8 flex items-center">
+                <Activity className="w-8 h-8 mr-4 text-cyan-400" />
+                Contract Activity Statistics
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="text-center">
+                  <div className="bg-gradient-to-r from-blue-500/20 to-cyan-600/20 rounded-xl p-8 border-blue-500/30">
+                    <h4 className="text-4xl font-bold text-blue-400 mb-2">
+                      {auditData.security_metrics.contract_age_days}
+                    </h4>
+                    <p className="text-gray-300 text-lg">Days Old</p>
+                    <p className="text-gray-400 text-sm mt-2">Contract age indicates maturity</p>
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  <div className="bg-gradient-to-r from-purple-500/20 to-pink-600/20 rounded-xl p-8 border-purple-500/30">
+                    <h4 className="text-4xl font-bold text-purple-400 mb-2">
+                      {auditData.security_metrics.transaction_count.toLocaleString()}
+                    </h4>
+                    <p className="text-gray-300 text-lg">Transactions</p>
+                    <p className="text-gray-400 text-sm mt-2">Total blockchain interactions</p>
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  <div className="bg-gradient-to-r from-emerald-500/20 to-green-600/20 rounded-xl p-8 border-emerald-500/30">
+                    <h4 className="text-4xl font-bold text-emerald-400 mb-2">
+                      {auditData.security_metrics.unique_users.toLocaleString()}
+                    </h4>
+                    <p className="text-gray-300 text-lg">Unique Users</p>
+                    <p className="text-gray-400 text-sm mt-2">Estimated unique addresses</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
 
             {/* Threat Vulnerabilities */}
             {auditData.vulnerabilities && auditData.vulnerabilities.length > 0 && (
@@ -618,11 +875,11 @@ const ContractSafetyChecker = () => {
               </div>
             )}
 
-            {/* Contract Intelligence */}
+            {/* Contract Intelligence - ENHANCED VERSION */}
             <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl p-10 border-gray-700/50 shadow-xl">
               <h3 className="text-3xl font-bold text-white mb-8 flex items-center">
                 <FileText className="w-8 h-8 mr-4 text-cyan-400" />
-                Contract Intelligence
+                Enhanced Contract Intelligence
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
@@ -647,6 +904,21 @@ const ContractSafetyChecker = () => {
                       <p className="capitalize font-medium text-gray-200 text-lg">{auditData.chain}</p>
                     </div>
                   </div>
+
+                  {/* ✨ NEW: Proxy Information */}
+                  {auditData.contract_info.proxy_type && (
+                    <div>
+                      <label className="block text-sm font-bold text-gray-300 mb-3">Proxy Type</label>
+                      <div className="bg-gray-900/50 rounded-xl p-4 border-gray-700/50">
+                        <p className="font-medium text-gray-200 text-lg">{auditData.contract_info.proxy_type}</p>
+                        {auditData.contract_info.implementation_address && (
+                          <p className="text-gray-400 text-sm mt-2">
+                            <strong>Implementation:</strong> {auditData.contract_info.implementation_address}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-6">
@@ -656,6 +928,25 @@ const ContractSafetyChecker = () => {
                       <p className="font-medium text-gray-200 text-lg">
                         {new Date(auditData.audit_timestamp).toLocaleString()}
                       </p>
+                    </div>
+                  </div>
+
+                  {/* ✨ NEW: Social Presence Score */}
+                  <div>
+                    <label className="block text-sm font-bold text-gray-300 mb-3">Social Legitimacy</label>
+                    <div className="bg-gray-900/50 rounded-xl p-4 border-gray-700/50">
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium text-gray-200 text-lg">
+                          Social Score: {auditData.social_presence.social_score}/100
+                        </p>
+                        <div className={`px-3 py-1 rounded-full text-sm font-bold ${auditData.social_presence.social_score >= 70 ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
+                            auditData.social_presence.social_score >= 40 ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
+                              'bg-red-500/20 text-red-400 border-red-500/30'
+                          } border`}>
+                          {auditData.social_presence.social_score >= 70 ? 'GOOD' :
+                            auditData.social_presence.social_score >= 40 ? 'MODERATE' : 'LOW'}
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -674,7 +965,6 @@ const ContractSafetyChecker = () => {
                 </div>
               </div>
             </div>
-
             {/* Security Technology Badge */}
             <div className="bg-gradient-to-r from-blue-500/10 to-purple-600/10 rounded-2xl p-10 border-blue-500/30 text-center backdrop-blur-xl">
               <div className="flex items-center justify-center mb-6">
@@ -834,7 +1124,7 @@ const ContractSafetyChecker = () => {
                 <Shield className="w-8 h-8 text-white" />
               </div>
               <div className="ml-4">
-                <span className="text-white font-bold text-2xl">Auto Sentinel</span>
+                <span className="text-white font-bold text-2xl">Auto Sentinel ✌️</span>
                 <p className="text-gray-400 text-sm">By Anjay Mabar Team</p>
               </div>
             </div>
