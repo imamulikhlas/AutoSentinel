@@ -28,30 +28,33 @@ app.add_middleware(
 # ✨ ENHANCED CHAIN CONFIGS dengan fallback
 CHAIN_CONFIGS = {
     "ethereum": {
-        "api_url": "https://api.etherscan.io/api",
-        "api_key_env": "ETHERSCAN_API_KEY",
+        "chain_id": 1,
         "explorer": "https://etherscan.io",
-        "fallback_api": "YourApiKeyToken"  # Free tier fallback
     },
     "polygon": {
-        "api_url": "https://api.polygonscan.com/api", 
-        "api_key_env": "POLYGONSCAN_API_KEY",
+        "chain_id": 137,
         "explorer": "https://polygonscan.com",
-        "fallback_api": "YourApiKeyToken"
     },
     "bsc": {
-        "api_url": "https://api.bscscan.com/api",
-        "api_key_env": "BSCSCAN_API_KEY", 
+        "chain_id": 56,
         "explorer": "https://bscscan.com",
-        "fallback_api": "YourApiKeyToken"
     },
     "arbitrum": {
-        "api_url": "https://api.arbiscan.io/api",
-        "api_key_env": "ARBISCAN_API_KEY",
+        "chain_id": 42161,
         "explorer": "https://arbiscan.io",
-        "fallback_api": "YourApiKeyToken"
+    },
+    "base": {
+        "chain_id": 8453,
+        "explorer": "https://basescan.org",
+    },
+    "optimism": {
+        "chain_id": 10,
+        "explorer": "https://optimistic.etherscan.io",
     }
 }
+
+ETHERSCAN_V2_API_URL = "https://api.etherscan.io/v2/api"
+ETHERSCAN_API_KEY = os.getenv("ETHERSCAN_API_KEY", "YourApiKeyToken")
 
 # Model classes
 class ContractRequest(BaseModel):
@@ -137,31 +140,38 @@ class EtherscanAPI:
         if self.chain not in CHAIN_CONFIGS:
             raise ValueError(f"Unsupported chain: {chain}")
         
-        self.config = CHAIN_CONFIGS[self.chain]
-        self.api_url = self.config["api_url"]
-        self.api_key = os.getenv(self.config["api_key_env"]) or self.config["fallback_api"]
+        self.chain_id = CHAIN_CONFIGS[self.chain]["chain_id"]
+        self.explorer = CHAIN_CONFIGS[self.chain]["explorer"]
         self.session = requests.Session()
         
+    def _make_request(self, params: dict, timeout: int = 30) -> dict:
+        """Make request to Etherscan v2 API with chainid"""
+        params.update({
+            "chainid": self.chain_id,
+            "apikey": ETHERSCAN_API_KEY
+        })
+        
+        response = self.session.get(ETHERSCAN_V2_API_URL, params=params, timeout=timeout)
+        response.raise_for_status()
+        return response.json()
+        
     def get_contract_info(self, address: str) -> ContractInfo:
-        """✅ REAL: Get real contract verification info"""
+        """Get contract verification info using v2 API"""
         try:
-            # Get contract source code info (already fetched by EnhancedRealContractFetcher)
             params = {
                 "module": "contract",
                 "action": "getsourcecode",
-                "address": address,
-                "apikey": self.api_key
+                "address": address
             }
             
-            response = self.session.get(self.api_url, params=params, timeout=30)
-            data = response.json()
+            data = self._make_request(params)
             
             if data.get("status") == "1" and data.get("result"):
                 result = data["result"][0]
                 
                 return ContractInfo(
                     is_verified=bool(result.get("SourceCode", "")),
-                    verification_date=None,  # API doesn't provide this
+                    verification_date=None,
                     compiler_version=result.get("CompilerVersion", ""),
                     contract_name=result.get("ContractName", ""),
                     proxy_type="proxy" if result.get("Proxy", "0") == "1" else None,
@@ -175,7 +185,7 @@ class EtherscanAPI:
             return ContractInfo(is_verified=False)
     
     def get_contract_stats(self, address: str) -> Dict:
-        """✅ REAL: Get real contract statistics"""
+        """Get contract statistics using v2 API"""
         try:
             stats = {
                 "contract_age_days": 0,
@@ -184,7 +194,7 @@ class EtherscanAPI:
                 "balance_eth": 0.0
             }
             
-            # 1. Get contract creation transaction
+            # Get contract creation transaction
             creation_params = {
                 "module": "account",
                 "action": "txlist",
@@ -193,12 +203,10 @@ class EtherscanAPI:
                 "endblock": 99999999,
                 "page": 1,
                 "offset": 1,
-                "sort": "asc",
-                "apikey": self.api_key
+                "sort": "asc"
             }
             
-            response = self.session.get(self.api_url, params=creation_params, timeout=30)
-            data = response.json()
+            data = self._make_request(creation_params)
             
             if data.get("status") == "1" and data.get("result"):
                 first_tx = data["result"][0]
@@ -207,7 +215,7 @@ class EtherscanAPI:
                     creation_date = datetime.fromtimestamp(creation_timestamp)
                     stats["contract_age_days"] = (datetime.now() - creation_date).days
             
-            # 2. Get recent transactions to estimate activity
+            # Get recent transactions
             recent_params = {
                 "module": "account",
                 "action": "txlist",
@@ -215,43 +223,38 @@ class EtherscanAPI:
                 "startblock": 0,
                 "endblock": 99999999,
                 "page": 1,
-                "offset": 1000,  # Get more recent transactions
-                "sort": "desc",
-                "apikey": self.api_key
+                "offset": 1000,
+                "sort": "desc"
             }
             
             time.sleep(0.2)  # Rate limiting
-            response = self.session.get(self.api_url, params=recent_params, timeout=30)
-            data = response.json()
+            data = self._make_request(recent_params)
             
             if data.get("status") == "1" and data.get("result"):
                 transactions = data["result"]
                 stats["transaction_count"] = len(transactions)
                 
-                # Count unique users (from addresses)
                 unique_addresses = set()
                 for tx in transactions:
                     unique_addresses.add(tx.get("from", "").lower())
                     unique_addresses.add(tx.get("to", "").lower())
                 
-                stats["unique_users"] = len(unique_addresses) - 1  # Exclude contract itself
+                stats["unique_users"] = len(unique_addresses) - 1
             
-            # 3. Get contract balance
+            # Get contract balance
             balance_params = {
                 "module": "account",
                 "action": "balance",
                 "address": address,
-                "tag": "latest",
-                "apikey": self.api_key
+                "tag": "latest"
             }
             
-            time.sleep(0.2)  # Rate limiting
-            response = self.session.get(self.api_url, params=balance_params, timeout=30)
-            data = response.json()
+            time.sleep(0.2)
+            data = self._make_request(balance_params)
             
             if data.get("status") == "1" and data.get("result"):
                 balance_wei = int(data["result"])
-                stats["balance_eth"] = balance_wei / 10**18  # Convert wei to ETH
+                stats["balance_eth"] = balance_wei / 10**18
             
             return stats
             
@@ -274,34 +277,36 @@ class HoneypotDetector:
         self.session = requests.Session()
         
     def analyze_contract(self, address: str, source_code: str) -> TradingAnalysis:
-        """✅ REAL: Check multiple honeypot detection APIs"""
         try:
-            # Try multiple APIs for better accuracy
-            for api_url in self.apis:
-                try:
-                    response = self.session.get(
-                        f"{api_url}?address={address}",
-                        timeout=15
-                    )
-                    
-                    if response.status_code == 200:
-                        data = response.json()
-                        return self._parse_honeypot_response(data, source_code)
-                        
-                except Exception as api_error:
-                    print(f"Honeypot API {api_url} failed: {api_error}")
-                    continue
+            honeypot_patterns = [
+                r'require\s*\(\s*false\s*\)',
+                r'revert\s*\(\s*\)',
+                r'selfdestruct\s*\(',
+                r'block\.timestamp\s*%',
+                r'tx\.origin\s*==',
+            ]
             
-            # Fallback: Source code analysis
-            return self._analyze_source_code(source_code)
+            honeypot_score = 0
+            for pattern in honeypot_patterns:
+                if re.search(pattern, source_code, re.IGNORECASE):
+                    honeypot_score += 1
+            
+            is_honeypot = honeypot_score >= 2
+            confidence = min(0.8, honeypot_score * 0.3)
+            
+            liquidity_locked = self._check_liquidity_lock(source_code)
+            
+            return TradingAnalysis(
+                is_honeypot=is_honeypot,
+                honeypot_confidence=confidence,
+                liquidity_locked=liquidity_locked,
+                trading_enabled=True
+            )
             
         except Exception as e:
             print(f"Honeypot detection failed: {e}")
-            return TradingAnalysis(
-                is_honeypot=False,
-                honeypot_confidence=0.0,
-                trading_enabled=True
-            )
+            return TradingAnalysis()
+    
     
     def _parse_honeypot_response(self, data: dict, source_code: str) -> TradingAnalysis:
         """Parse honeypot API response"""
@@ -842,16 +847,8 @@ class EnhancedRealContractFetcher:
         if self.chain not in CHAIN_CONFIGS:
             raise ValueError(f"Unsupported chain: {chain}")
         
-        self.config = CHAIN_CONFIGS[self.chain]
-        self.api_url = self.config["api_url"]
-        self.api_key = os.getenv(self.config["api_key_env"])
-        
-        # ✨ Use fallback if no API key provided
-        if not self.api_key:
-            self.api_key = self.config["fallback_api"]
-            print(f"⚠️ Using fallback API key for {self.chain}")
-        
-        self.explorer = self.config["explorer"]
+        self.chain_id = CHAIN_CONFIGS[self.chain]["chain_id"]
+        self.explorer = CHAIN_CONFIGS[self.chain]["explorer"]
         self.session = requests.Session()
         self.session.headers.update({
             'User-Agent': 'Smart-Contract-Auditor/1.0'
@@ -878,7 +875,7 @@ class EnhancedRealContractFetcher:
             return False
     
     def fetch_contract_source(self, address: str, retry_count: int = 3) -> Dict:
-        """✨ ENHANCED: Fetch contract source with robust error handling"""
+        """Fetch contract source using Etherscan v2 API"""
         
         if not self.validate_address(address):
             raise ValueError(f"Invalid contract address format: {address}")
@@ -888,14 +885,15 @@ class EnhancedRealContractFetcher:
                 print(f"🔍 Attempt {attempt + 1}: Fetching contract source for {address} on {self.chain}...")
                 
                 params = {
+                    "chainid": self.chain_id,
                     "module": "contract",
                     "action": "getsourcecode", 
                     "address": address,
-                    "apikey": self.api_key
+                    "apikey": ETHERSCAN_API_KEY
                 }
                 
                 response = self.session.get(
-                    self.api_url, 
+                    ETHERSCAN_V2_API_URL, 
                     params=params, 
                     timeout=30
                 )
@@ -903,7 +901,6 @@ class EnhancedRealContractFetcher:
                 
                 data = response.json()
                 
-                # ✨ Enhanced response validation
                 if not isinstance(data, dict):
                     raise ValueError("Invalid API response format")
                 
@@ -930,7 +927,6 @@ class EnhancedRealContractFetcher:
                         f"Please verify the contract on {self.explorer}"
                     )
                 
-                # ✨ Enhanced contract data extraction
                 result = {
                     "source_code": source_code,
                     "contract_name": contract_data.get("ContractName", "Unknown"),
@@ -960,13 +956,6 @@ class EnhancedRealContractFetcher:
                     time.sleep(3)
                     continue
                 raise ValueError("Network connection error")
-                
-            except requests.exceptions.RequestException as e:
-                print(f"📡 Request error on attempt {attempt + 1}: {e}")
-                if attempt < retry_count - 1:
-                    time.sleep(2)
-                    continue
-                raise ValueError(f"Network error fetching contract: {str(e)}")
                 
             except Exception as e:
                 print(f"❌ Unexpected error on attempt {attempt + 1}: {e}")
@@ -1066,11 +1055,18 @@ class EnhancedRealContractFetcher:
             print("⚠️ Adding missing pragma directive")
             cleaned = "pragma solidity ^0.8.0;\n\n" + cleaned
         
+        # ✨ FIX: Convert exact pragma versions to flexible ones
+        cleaned = re.sub(
+            r'pragma\s+solidity\s+(\d+\.\d+\.\d+)\s*;',
+            r'pragma solidity ^\1;',
+            cleaned,
+            flags=re.IGNORECASE
+        )
+        
         # Remove potential problematic characters
         cleaned = re.sub(r'[\x00-\x08\x0b-\x0c\x0e-\x1f\x7f-\x9f]', '', cleaned)
         
         return cleaned
-    
     def save_contract_to_file(self, source_code: str, contract_name: str, address: str) -> str:
         """✨ ENHANCED: Save contract with better error handling"""
         try:
@@ -1244,7 +1240,7 @@ def calculate_analysis_confidence(
     return round(overall_confidence, 2)
 
 def run_slither(source_path: str, wallet_address: str) -> tuple[List[VulnerabilityDetail], str]:
-    """✅ MODIFIED: Run Slither analysis and return vulnerabilities + temp path for full audit saving later"""
+    """✅ ENHANCED: Run Slither with pragma version fallback"""
     slither_exe = shutil.which("slither") or shutil.which("slither.cmd")
     if not slither_exe:
         raise RuntimeError("❌ Slither tidak ditemukan di PATH.")
@@ -1259,23 +1255,88 @@ def run_slither(source_path: str, wallet_address: str) -> tuple[List[Vulnerabili
     json_filename = f"slither_temp_{wallet_short}_{timestamp}.json"
     json_filepath = os.path.join(audit_results_dir, json_filename)
 
-    # Run Slither
+    # ✅ FIRST ATTEMPT: Normal Slither run
     result = subprocess.run(
         [slither_exe, source_path, "--json", json_filepath],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
     )
 
-    if not os.path.exists(json_filepath):
-        raise RuntimeError(f"Gagal menjalankan Slither. Exit code: {result.returncode}")
+    # If successful, return normally
+    if result.returncode == 0 and os.path.exists(json_filepath):
+        with open(json_filepath) as f:
+            data = json.load(f)
+        vulnerabilities = parse_slither_results(data)
+        return vulnerabilities, json_filepath
 
-    with open(json_filepath) as f:
-        data = json.load(f)
+    # ✅ FALLBACK: Handle compilation errors
+    if "compiler version" in result.stderr.lower() or "pragma solidity" in result.stderr.lower():
+        print("🔧 Detected pragma version issue, attempting fix...")
+        
+        try:
+            # Read and fix pragma
+            with open(source_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Convert exact pragma to flexible
+            fixed_content = re.sub(
+                r'pragma\s+solidity\s+(\d+\.\d+\.\d+)\s*;',
+                r'pragma solidity ^\1;',
+                content,
+                flags=re.IGNORECASE
+            )
+            
+            # Write back
+            backup_path = source_path + ".backup"
+            shutil.copy2(source_path, backup_path)
+            
+            with open(source_path, 'w', encoding='utf-8') as f:
+                f.write(fixed_content)
+            
+            print("🔍 Retrying Slither with flexible pragma...")
+            
+            # Try again
+            result2 = subprocess.run(
+                [slither_exe, source_path, "--json", json_filepath],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            
+            # Restore original
+            shutil.move(backup_path, source_path)
+            
+            if result2.returncode == 0 and os.path.exists(json_filepath):
+                print("✅ Slither succeeded with flexible pragma")
+                with open(json_filepath) as f:
+                    data = json.load(f)
+                vulnerabilities = parse_slither_results(data)
+                return vulnerabilities, json_filepath
+                
+        except Exception as e:
+            print(f"❌ Fallback failed: {e}")
 
-    vulnerabilities = parse_slither_results(data)
+    # ✅ FINAL FALLBACK: Return limited analysis
+    print("⚠️ Slither failed, returning limited analysis...")
     
-    # ✅ Return temporary path - will be replaced with full audit path later
-    return vulnerabilities, json_filepath
+    # Create minimal result
+    limited_vulns = [
+        VulnerabilityDetail(
+            type="compilation-error",
+            severity="Informational", 
+            description=f"Contract analysis incomplete due to compilation issues: {result.stderr[:200]}",
+            impact="Limited analysis available",
+            recommendation="Consider using compatible Solidity version"
+        )
+    ]
+    
+    # Create dummy JSON
+    dummy_data = {"results": {"detectors": []}}
+    with open(json_filepath, 'w') as f:
+        json.dump(dummy_data, f)
+    
+    return limited_vulns, json_filepath
 
 def clean_ai_html_output(text: str) -> str:
     """Clean AI-generated HTML output"""
