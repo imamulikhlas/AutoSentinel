@@ -847,7 +847,9 @@ const getUserFriendlyVuln = (vuln: VulnerabilityDetail) => {
                             <span className={`px-6 py-3 rounded-xl text-sm font-bold border ${getSeverityColor(vuln.severity)}`}>
                               {vuln.severity.toUpperCase()} THREAT
                             </span>
-                            <h4 className="font-bold text-white ml-6 text-2xl">{friendlyVuln.friendlyName}</h4>
+                            <h4 className="font-bold text-white ml-6 text-xl sm:text-2xl break-words whitespace-pre-wrap max-w-full min-w-0">
+                              {friendlyVuln.friendlyName}
+                            </h4>
                           </div>
                         </div>
 
@@ -857,7 +859,9 @@ const getUserFriendlyVuln = (vuln: VulnerabilityDetail) => {
                               <AlertTriangle className="w-5 h-5 mr-2" />
                               Threat Impact
                             </h5>
-                            <p className="text-gray-200 leading-relaxed">{friendlyVuln.userImpact}</p>
+                            <p className="text-gray-200 leading-relaxed break-words whitespace-pre-line">
+                              {friendlyVuln.userImpact}
+                            </p>
                           </div>
 
                           <div className="bg-gray-900/50 rounded-xl p-6 border-blue-500/20">
