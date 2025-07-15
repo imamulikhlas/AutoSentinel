@@ -553,8 +553,11 @@ def generate_vulnerability_recommendation(vuln_type: str) -> str:
     
     return recommendations.get(vuln_type, "Review this issue and implement appropriate security measures.")
 
-def calculate_security_metrics(vulnerabilities: List[VulnerabilityDetail]) -> SecurityMetrics:
-    """Calculate security metrics from vulnerabilities"""
+def calculate_security_metrics(vulnerabilities: List[VulnerabilityDetail], contract_value: float = 0) -> SecurityMetrics:
+    """
+    ✅ UPDATED: Enhanced security metrics menggunakan metodologi CertiK + Quantstamp
+    """
+    # Count vulnerabilities by severity
     critical_issues = len([v for v in vulnerabilities if v.severity == "Critical"])
     high_issues = len([v for v in vulnerabilities if v.severity == "High"])
     medium_issues = len([v for v in vulnerabilities if v.severity == "Medium"])
@@ -563,9 +566,45 @@ def calculate_security_metrics(vulnerabilities: List[VulnerabilityDetail]) -> Se
     
     total_issues = len(vulnerabilities)
     
-    # Calculate scores (100 = perfect, 0 = terrible)
-    security_score = max(0, 100 - (critical_issues * 25) - (high_issues * 15) - (medium_issues * 5))
-    code_quality_score = max(0, 100 - (total_issues * 2))
+    # ✨ NEW: Enhanced vulnerability scoring (Quantstamp methodology)
+    base_score = 100
+    
+    # Critical vulnerabilities - Exponential penalty if multiple
+    if critical_issues > 0:
+        critical_penalty = critical_issues * 50
+        if critical_issues > 1:
+            # Exponential multiplier for multiple criticals
+            critical_penalty *= (1.5 ** (critical_issues - 1))
+        base_score -= min(critical_penalty, 100)  # Cap at 100
+    
+    # High vulnerabilities - Progressive penalty
+    if high_issues > 0:
+        high_penalty = high_issues * 25
+        if high_issues > 2:
+            # Additional penalty for many high issues
+            high_penalty *= 1.3
+        base_score -= high_penalty
+    
+    # Medium vulnerabilities - With combination amplifier
+    if medium_issues > 0:
+        medium_penalty = medium_issues * 10
+        # If many medium issues, treat as higher risk
+        if medium_issues >= 5:
+            medium_penalty *= 1.4
+        base_score -= medium_penalty
+    
+    # Low and informational
+    base_score -= (low_issues * 2)
+    base_score -= (informational_issues * 0.5)
+    
+    # ✨ NEW: Context-based adjustments
+    security_score = max(0, min(100, base_score))
+    
+    # Code quality score (separate from security)
+    code_quality_base = 100
+    code_quality_base -= (total_issues * 3)  # General penalty for any issues
+    code_quality_base -= (critical_issues * 20)  # Heavy penalty for criticals
+    code_quality_score = max(0, min(100, code_quality_base))
     
     return SecurityMetrics(
         total_issues=total_issues,
@@ -574,8 +613,8 @@ def calculate_security_metrics(vulnerabilities: List[VulnerabilityDetail]) -> Se
         medium_issues=medium_issues,
         low_issues=low_issues,
         informational_issues=informational_issues,
-        code_quality_score=code_quality_score,
-        security_score=security_score
+        code_quality_score=int(code_quality_score),
+        security_score=int(security_score)
     )
 
 def analyze_ownership(source_code: str, address: str, etherscan_api: EtherscanAPI = None) -> OwnershipAnalysis:
@@ -651,32 +690,149 @@ def calculate_trust_score(
     contract_info: ContractInfo,
     ownership_analysis: OwnershipAnalysis,
     trading_analysis: TradingAnalysis,
-    social_presence: SocialPresence
+    social_presence: SocialPresence,
+    contract_stats: Dict = None
 ) -> int:
-    """Calculate overall trust score"""
-    base_score = 50
+    """
+    ✅ UPDATED: Enhanced trust score menggunakan metodologi CertiK + DeFiSafety
+    Formula: (Technical × 0.4 + Economic × 0.3 + Operational × 0.3) × Confidence × Penalty
+    """
     
-    # Security metrics impact (max +30)
-    base_score += min(30, metrics.security_score // 3)
+    # ✨ CRITICAL FLAGS - Instant penalties (Industry Standard)
+    if trading_analysis.is_honeypot and trading_analysis.honeypot_confidence >= 0.7:
+        return 0  # Instant fail for confirmed honeypots
     
-    # Contract verification (+20)
+    if contract_stats:
+        tvl_estimate = contract_stats.get("balance_eth", 0) * 3000  # Rough USD estimate
+        if not contract_info.is_verified and tvl_estimate > 100000:  # >$100k
+            return min(30, 30)  # Max 30 for unverified high-value contracts
+    
+    if metrics.critical_issues >= 2:
+        return min(20, 20)  # Max 20 for multiple critical vulnerabilities
+    
+    # ============= BASE SCORING CALCULATION =============
+    
+    # 🔹 TECHNICAL SECURITY COMPONENT (40% weight)
+    technical_score = 0
+    
+    # Security audit results (20 points max)
+    security_component = min(20, metrics.security_score * 0.2)
+    technical_score += security_component
+    
+    # Code quality (10 points max)
+    code_quality_component = min(10, metrics.code_quality_score * 0.1)
+    technical_score += code_quality_component
+    
+    # Contract verification (10 points max)
     if contract_info.is_verified:
-        base_score += 20
+        technical_score += 10
     
-    # Honeypot check (-50 if honeypot)
+    # 🔹 ECONOMIC SECURITY COMPONENT (30% weight)
+    economic_score = 0
+    
+    # Liquidity analysis (10 points max)
+    if trading_analysis.liquidity_locked:
+        economic_score += 10
+    elif not trading_analysis.is_honeypot:
+        economic_score += 5  # Partial credit
+    
+    # Trading patterns (10 points max)
+    if not trading_analysis.is_honeypot:
+        economic_score += 8
+        # Bonus for reasonable taxes
+        if trading_analysis.buy_tax and trading_analysis.sell_tax:
+            if trading_analysis.buy_tax <= 0.05 and trading_analysis.sell_tax <= 0.05:  # ≤5%
+                economic_score += 2
+    
+    # Market stability (10 points max) - based on contract age and activity
+    if contract_stats:
+        age_days = contract_stats.get("contract_age_days", 0)
+        tx_count = contract_stats.get("transaction_count", 0)
+        
+        # Age bonus (max 5 points)
+        if age_days >= 365:  # 1+ year
+            economic_score += 5
+        elif age_days >= 180:  # 6+ months
+            economic_score += 3
+        elif age_days >= 30:  # 1+ month
+            economic_score += 1
+        
+        # Activity bonus (max 5 points)
+        if tx_count >= 10000:
+            economic_score += 5
+        elif tx_count >= 1000:
+            economic_score += 3
+        elif tx_count >= 100:
+            economic_score += 1
+    
+    # 🔹 OPERATIONAL SECURITY COMPONENT (30% weight)
+    operational_score = 0
+    
+    # Ownership decentralization (15 points max)
+    if ownership_analysis.ownership_renounced:
+        operational_score += 15
+    elif ownership_analysis.is_multisig:
+        operational_score += 10
+    elif ownership_analysis.centralization_risk == "Low":
+        operational_score += 5
+    elif ownership_analysis.centralization_risk == "Medium":
+        operational_score += 2
+    # High centralization = 0 points
+    
+    # Social credibility (10 points max)
+    social_component = min(10, social_presence.social_score * 0.1)
+    operational_score += social_component
+    
+    # Transparency (5 points max)
+    if contract_info.is_verified:
+        operational_score += 3
+    if social_presence.website or social_presence.github:
+        operational_score += 2
+    
+    # ============= CONFIDENCE & PENALTY CALCULATION =============
+    
+    # Base final score
+    final_base_score = technical_score + economic_score + operational_score
+    
+    # ✨ Confidence multiplier based on data quality
+    confidence_multiplier = 1.0
+    
+    # Reduce confidence if limited data
+    if not contract_info.is_verified:
+        confidence_multiplier *= 0.85
+    
+    if trading_analysis.honeypot_confidence < 0.5:  # Low confidence honeypot detection
+        confidence_multiplier *= 0.9
+    
+    if social_presence.social_score < 20:  # Very low social presence
+        confidence_multiplier *= 0.95
+    
+    # ✨ Additional penalties
+    penalty_multiplier = 1.0
+    
+    # Honeypot risk (even with low confidence)
     if trading_analysis.is_honeypot:
-        base_score -= 50
+        if trading_analysis.honeypot_confidence >= 0.5:
+            penalty_multiplier *= 0.3  # Heavy penalty
+        else:
+            penalty_multiplier *= 0.7  # Moderate penalty
     
-    # Ownership centralization impact
-    if ownership_analysis.centralization_risk == "Low":
-        base_score += 10
-    elif ownership_analysis.centralization_risk == "High":
-        base_score -= 15
+    # High tax penalty
+    if trading_analysis.buy_tax and trading_analysis.sell_tax:
+        total_tax = trading_analysis.buy_tax + trading_analysis.sell_tax
+        if total_tax > 0.2:  # >20% total tax
+            penalty_multiplier *= 0.6
+        elif total_tax > 0.1:  # >10% total tax
+            penalty_multiplier *= 0.8
     
-    # Social presence impact (max +10)
-    base_score += min(10, social_presence.social_score // 10)
+    # ============= FINAL CALCULATION =============
     
-    return max(0, min(100, base_score))
+    final_score = final_base_score * confidence_multiplier * penalty_multiplier
+    
+    # Ensure score is between 0-100
+    final_score = max(0, min(100, final_score))
+    
+    return int(final_score)
 
 class EnhancedRealContractFetcher:
     """✨ ENHANCED: Robust real contract fetcher with multiple fallbacks"""
@@ -958,34 +1114,134 @@ def determine_risk_level(
     metrics: SecurityMetrics, 
     contract_info: ContractInfo, 
     ownership: OwnershipAnalysis, 
-    trading: TradingAnalysis
+    trading: TradingAnalysis,
+    trust_score: int,
+    contract_stats: Dict = None
 ) -> tuple:
-    """Enhanced risk level determination"""
+    """
+    ✅ UPDATED: Enhanced risk level dengan critical flags industry standard
+    """
     
     risk_factors = []
     
-    # Critical risks
-    if trading.is_honeypot:
-        return "Critical", ["Honeypot detected"]
+    # ✨ EMERGENCY LEVEL - Immediate danger
+    if trading.is_honeypot and trading.honeypot_confidence >= 0.8:
+        return "Emergency", ["🚨 CONFIRMED HONEYPOT - DO NOT INTERACT"]
+    
+    # Estimate TVL for unverified check
+    tvl_estimate = 0
+    if contract_stats:
+        tvl_estimate = contract_stats.get("balance_eth", 0) * 3000  # Rough USD
+    
+    if not contract_info.is_verified and tvl_estimate > 500000:  # >$500k
+        return "Emergency", ["🚨 UNVERIFIED HIGH-VALUE CONTRACT - EXTREME RISK"]
+    
+    # ✨ CRITICAL LEVEL - Severe risks
+    if metrics.critical_issues >= 2:
+        risk_factors.append(f"🔴 {metrics.critical_issues} critical vulnerabilities")
+        return "Critical", risk_factors
+    
+    if trading.is_honeypot and trading.honeypot_confidence >= 0.5:
+        risk_factors.append("🔴 Likely honeypot detected")
+        return "Critical", risk_factors
+    
+    if not contract_info.is_verified and tvl_estimate > 100000:  # >$100k
+        risk_factors.append("🔴 Unverified contract with high value")
+        return "Critical", risk_factors
+    
+    # ✨ HIGH LEVEL - Significant risks
+    if metrics.critical_issues >= 1:
+        risk_factors.append(f"🟡 {metrics.critical_issues} critical vulnerability")
+    
+    if metrics.high_issues >= 3:
+        risk_factors.append(f"🟡 {metrics.high_issues} high-severity issues")
+    
+    if ownership.centralization_risk == "High" and len(ownership.admin_functions) > 5:
+        risk_factors.append("🟡 High centralization with many admin functions")
+    
+    if trust_score < 30:
+        risk_factors.append("🟡 Very low trust score")
+    
+    if risk_factors:
+        return "High", risk_factors
+    
+    # ✨ MEDIUM LEVEL - Moderate risks
+    if metrics.high_issues >= 1:
+        risk_factors.append(f"🟠 {metrics.high_issues} high-severity issue(s)")
+    
+    if metrics.medium_issues >= 5:
+        risk_factors.append(f"🟠 {metrics.medium_issues} medium-severity issues")
     
     if not contract_info.is_verified:
-        risk_factors.append("Unverified contract")
-    
-    if metrics.critical_issues > 0:
-        risk_factors.append(f"{metrics.critical_issues} critical vulnerabilities")
+        risk_factors.append("🟠 Contract not verified")
     
     if ownership.centralization_risk == "High":
-        risk_factors.append("High centralization risk")
+        risk_factors.append("🟠 High ownership centralization")
     
-    # Determine level
-    if risk_factors and any("critical" in factor.lower() for factor in risk_factors):
-        return "Critical", risk_factors
-    elif metrics.high_issues >= 3 or metrics.trust_score < 50:
-        return "High", risk_factors
-    elif metrics.high_issues > 0 or metrics.medium_issues >= 5 or metrics.trust_score < 70:
+    if trust_score < 50:
+        risk_factors.append("🟠 Below-average trust score")
+    
+    if trading.buy_tax and trading.sell_tax:
+        total_tax = trading.buy_tax + trading.sell_tax
+        if total_tax > 0.1:  # >10%
+            risk_factors.append(f"🟠 High trading tax ({total_tax*100:.1f}%)")
+    
+    if risk_factors:
         return "Medium", risk_factors
-    else:
+    
+    # ✨ LOW LEVEL - Minor or no significant risks
+    if metrics.medium_issues >= 1 or metrics.low_issues >= 3:
+        risk_factors.append("🟢 Minor issues found")
+    
+    if trust_score < 70:
+        risk_factors.append("🟢 Room for improvement in trust metrics")
+    
+    if risk_factors:
         return "Low", risk_factors
+    else:
+        return "Low", ["🟢 No significant risks detected"]
+    
+def calculate_analysis_confidence(
+    contract_info: ContractInfo,
+    trading_analysis: TradingAnalysis,
+    social_presence: SocialPresence,
+    contract_stats: Dict = None
+) -> float:
+    """
+    NEW: Calculate overall confidence in analysis results
+    """
+    confidence_factors = []
+    
+    # Contract verification confidence
+    if contract_info.is_verified:
+        confidence_factors.append(0.9)
+    else:
+        confidence_factors.append(0.3)
+    
+    # Honeypot detection confidence
+    confidence_factors.append(trading_analysis.honeypot_confidence)
+    
+    # Social analysis confidence
+    if social_presence.social_score > 50:
+        confidence_factors.append(0.8)
+    elif social_presence.social_score > 20:
+        confidence_factors.append(0.6)
+    else:
+        confidence_factors.append(0.4)
+    
+    # Contract age confidence
+    if contract_stats:
+        age_days = contract_stats.get("contract_age_days", 0)
+        if age_days > 365:
+            confidence_factors.append(0.9)
+        elif age_days > 90:
+            confidence_factors.append(0.7)
+        else:
+            confidence_factors.append(0.5)
+    
+    # Calculate weighted average confidence
+    overall_confidence = sum(confidence_factors) / len(confidence_factors)
+    return round(overall_confidence, 2)
 
 def run_slither(source_path: str, wallet_address: str) -> tuple[List[VulnerabilityDetail], str]:
     """✅ MODIFIED: Run Slither analysis and return vulnerabilities + temp path for full audit saving later"""
@@ -1277,20 +1533,20 @@ def audit_contract(data: ContractRequest):
         contract_stats = etherscan_api.get_contract_stats(address)
         
         # 6. ✨ Calculate comprehensive security metrics
-        metrics = calculate_security_metrics(vulnerabilities)
+        metrics = calculate_security_metrics(vulnerabilities, contract_stats.get("balance_eth", 0))
         metrics.contract_age_days = contract_stats.get("contract_age_days", 1)
         metrics.transaction_count = contract_stats.get("transaction_count", 0)
         metrics.unique_users = contract_stats.get("unique_users", 0)
         
         # Calculate overall trust score
         trust_score = calculate_trust_score(
-            metrics, contract_info, ownership_analysis, trading_analysis, social_presence
+            metrics, contract_info, ownership_analysis, trading_analysis, social_presence, contract_stats
         )
         metrics.trust_score = trust_score
         
         # 7. ✨ Enhanced risk assessment
         risk_level, risk_details = determine_risk_level(
-            metrics, contract_info, ownership_analysis, trading_analysis
+            metrics, contract_info, ownership_analysis, trading_analysis, trust_score, contract_stats
         )
         
         # 8. ✨ Generate comprehensive AI analysis
