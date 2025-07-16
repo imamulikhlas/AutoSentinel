@@ -12,10 +12,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Optional
 from dotenv import load_dotenv
-import google.generativeai as genai
 
 load_dotenv()
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")
 
 app = FastAPI(title="Smart Contract Security Audit API", version="2.0.0")
 app.add_middleware(
@@ -1271,127 +1270,420 @@ def clean_ai_html_output(text: str) -> str:
     # Remove markdown code blocks if present
     text = re.sub(r'```html\n?', '', text)
     text = re.sub(r'```\n?', '', text)
-    return text.strip()
+    text = re.sub(r'\*\*.*?\*\*', '', text)  # Remove markdown bold
+    text = re.sub(r'#{1,6}\s.*?\n', '', text)  # Remove markdown headers
+    
+    # Remove any leading/trailing whitespace
+    text = text.strip()
+    
+    # If doesn't start with <div, try to find the actual HTML content
+    if not text.startswith('<div'):
+        # Find the first occurrence of <div class="space-y-6
+        match = re.search(r'<div class="space-y-6.*?</div>\s*$', text, re.DOTALL)
+        if match:
+            text = match.group(0)
+    
+    return text
 
 def generate_detailed_summary(
     vulnerabilities: List[VulnerabilityDetail],
     metrics: SecurityMetrics,
     contract_info: ContractInfo,
     ownership_analysis: OwnershipAnalysis,
-    trading_analysis: TradingAnalysis
+    trading_analysis: TradingAnalysis,
+    social_presence: SocialPresence,
+    contract_stats: Dict = None
 ) -> str:
-    """Enhanced AI summary with additional context"""
+    """Expert analysis that FOLLOWS the actual data and risk assessment"""
     
     if not vulnerabilities and contract_info.is_verified and not trading_analysis.is_honeypot:
         return """
-        <div class="text-green-400 text-base leading-relaxed">
-          ✅ <strong>Kontrak ini terlihat aman untuk digunakan.</strong><br/>
-          ✅ <strong>Kontrak terverifikasi dan tidak ditemukan indikasi honeypot.</strong><br/>
-          Tidak ditemukan kerentanan yang membahayakan pengguna.
+        <div class="space-y-6 text-gray-200 text-base leading-relaxed">
+          <section class="bg-gradient-to-r from-emerald-600/20 to-green-600/20 rounded-xl p-6 border border-emerald-400/30">
+            <div class="flex items-center mb-4">
+              <span class="text-3xl mr-4">🎖️</span>
+              <h2 class="text-2xl font-bold text-emerald-300">Expert Assessment: Premium Grade Protocol</h2>
+            </div>
+            <div class="bg-emerald-500/10 rounded-lg p-4 border border-emerald-400/20">
+              <p class="text-lg font-medium text-emerald-200">Sebagai blockchain security expert, saya menilai kontrak ini memiliki security posture yang exceptional. Clean vulnerability scan + verified codebase + no honeypot indicators = protokol dengan institutional-grade security standards.</p>
+            </div>
+          </section>
         </div>
         """
 
-    # Enhanced context for AI
-    additional_context = f"""
+    # FOLLOW THE ACTUAL DATA
+    contract_age = contract_stats.get("contract_age_days", 0) if contract_stats else 0
+    tx_count = contract_stats.get("transaction_count", 0) if contract_stats else 0
+    unique_users = contract_stats.get("unique_users", 0) if contract_stats else 0
+    balance_eth = contract_stats.get("balance_eth", 0) if contract_stats else 0
+
+    # Calculate based on REAL metrics
+    estimated_tvl = balance_eth * 3000
+    user_retention = tx_count / max(unique_users, 1) if unique_users > 0 else 0
     
-KONTEKS TAMBAHAN:
-- Status Verifikasi: {'✅ Terverifikasi' if contract_info.is_verified else '❌ Tidak Terverifikasi'}
-- Honeypot Risk: {'🚨 TINGGI' if trading_analysis.is_honeypot else '✅ Rendah'}
-- Ownership Risk: {ownership_analysis.centralization_risk}
-- Admin Functions: {len(ownership_analysis.admin_functions)} fungsi admin ditemukan
-- Trust Score: {metrics.trust_score}/100
-    """
+    # Expert assessment based on ACTUAL data
+    critical_vulns = [v for v in vulnerabilities if v.severity == "Critical"]
+    high_vulns = [v for v in vulnerabilities if v.severity == "High"] 
+    medium_vulns = [v for v in vulnerabilities if v.severity == "Medium"]
+    
+    # Determine expert grade based on REAL risk assessment
+    if metrics.trust_score < 30 or len(critical_vulns) > 0 or trading_analysis.is_honeypot:
+        expert_grade = "F"
+        risk_category = "CRITICAL_AVOID"
+    elif metrics.trust_score < 50 or len(high_vulns) >= 2:
+        expert_grade = "D"
+        risk_category = "HIGH_RISK"
+    elif metrics.trust_score < 60 or len(high_vulns) >= 1:
+        expert_grade = "C"
+        risk_category = "MODERATE_RISK"
+    elif metrics.trust_score < 75:
+        expert_grade = "B"
+        risk_category = "ACCEPTABLE_RISK"
+    else:
+        expert_grade = "A"
+        risk_category = "LOW_RISK"
 
     prompt = f"""
-Kamu adalah AI auditor keamanan untuk pengguna umum (bukan developer).
+You are a SENIOR BLOCKCHAIN SECURITY EXPERT analyzing a smart contract. You MUST base your analysis on the ACTUAL DATA provided.
 
-Tujuanmu adalah menjelaskan hasil analisis keamanan smart contract secara mudah dipahami, dengan struktur HTML + Tailwind CSS.
+**CRITICAL: The system has already determined this contract has Trust Score: {metrics.trust_score}/100 with {len(high_vulns)} HIGH SEVERITY vulnerabilities. Your analysis MUST be consistent with this assessment.**
 
-⚠️ Jangan gunakan istilah teknis seperti `tx.origin`, `solc`, `immutable`, dsb. Ubah istilah teknis menjadi analogi atau penjelasan awam.
+**ACTUAL CONTRACT DATA:**
+- System Risk Assessment: Trust Score {metrics.trust_score}/100
+- Critical Vulnerabilities: {metrics.critical_issues}
+- High Severity Issues: {metrics.high_issues} (including reentrancy attacks, arbitrary-send-eth)
+- Medium Severity Issues: {metrics.medium_issues}
+- Contract Age: {contract_age} days
+- Total Vulnerability Count: {metrics.total_issues}
+- Is Verified: {contract_info.is_verified}
+- Honeypot Status: {trading_analysis.is_honeypot}
 
-Struktur HTML:
-<div class="space-y-6 text-gray-200 text-base leading-relaxed">
-  <section>🔐 Status Keamanan Umum</section>
-  <section>📊 Statistik Keamanan</section>
-  <section>🔍 Analisis Tambahan</section>
-  <section>⚠️ Hal yang Perlu Diperhatikan</section>
-  <section>✅ Rekomendasi untuk Pengguna</section>
+**SPECIFIC VULNERABILITIES FOUND:**
+{chr(10).join([f"- {v.type} ({v.severity}): {v.description[:100]}..." for v in vulnerabilities[:5]])}
+
+**YOUR EXPERT ASSESSMENT MUST MATCH THE DATA:**
+- If Trust Score < 50 and High Vulns > 0: This is HIGH RISK
+- If Critical Vulns > 0: This is CRITICAL RISK
+- If Contract Age < 7 days: Add "experimental/unproven" risk factor
+- If High Vulns include reentrancy: Emphasize attack risk
+
+**OUTPUT FORMAT:**
+
+<div class="space-y-8 text-gray-200 text-base leading-relaxed">
+
+  <section class="bg-gradient-to-r from-red-600/20 to-rose-600/20 rounded-xl p-6 border border-red-400/30">
+    <div class="flex items-center mb-6">
+      <span class="text-3xl mr-4">🚨</span>
+      <h2 class="text-2xl font-bold text-red-300">EXPERT SECURITY ALERT</h2>
+    </div>
+    
+    <div class="bg-red-500/20 rounded-lg p-5 border border-red-400/30 mb-6">
+      <h3 class="text-red-300 font-bold text-xl mb-3">⚠️ HIGH RISK ASSESSMENT CONFIRMED</h3>
+      <p class="text-gray-300 leading-relaxed text-lg">
+        Based on my analysis of {metrics.total_issues} security issues including {metrics.high_issues} high-severity vulnerabilities, this contract presents SIGNIFICANT RISK to users. The trust score of {metrics.trust_score}/100 confirms this assessment.
+      </p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="bg-black/40 rounded-lg p-4 border border-red-400/20">
+        <h4 class="text-red-300 font-bold mb-2">🎯 Critical Attack Vectors</h4>
+        <p class="text-gray-300 text-sm">
+          [Analyze the specific high-severity vulnerabilities found, especially reentrancy and arbitrary-send-eth]
+        </p>
+      </div>
+      
+      <div class="bg-black/40 rounded-lg p-4 border border-red-400/20">
+        <h4 class="text-red-300 font-bold mb-2">⏰ Maturity Risk</h4>
+        <p class="text-gray-300 text-sm">
+          Contract age of {contract_age} days = Unproven and high experimental risk
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-gradient-to-r from-amber-600/20 to-orange-600/20 rounded-xl p-6 border border-amber-400/30">
+    <div class="flex items-center mb-6">
+      <span class="text-3xl mr-4">🔬</span>
+      <h2 class="text-2xl font-bold text-amber-300">Technical Vulnerability Analysis</h2>
+    </div>
+    
+    <div class="space-y-4">
+      <div class="bg-black/40 rounded-lg p-5 border border-amber-400/20">
+        <h3 class="text-amber-300 font-bold text-lg mb-3">⚔️ Exploitation Potential</h3>
+        <p class="text-gray-300 leading-relaxed">
+          [Detailed analysis of how the vulnerabilities can be exploited, focusing on reentrancy attacks and fund drainage risks]
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-gradient-to-r from-purple-600/20 to-indigo-600/20 rounded-xl p-6 border border-purple-400/30">
+    <div class="flex items-center mb-6">
+      <span class="text-3xl mr-4">🏭</span>
+      <h2 class="text-2xl font-bold text-purple-300">Professional Risk Rating</h2>
+    </div>
+    
+    <div class="bg-black/40 rounded-lg p-5 border border-purple-400/20">
+      <h3 class="text-purple-300 font-bold text-lg mb-3">📊 Expert Verdict</h3>
+      <p class="text-gray-300 leading-relaxed">
+        [Give specific recommendations based on the high-risk assessment]
+      </p>
+    </div>
+  </section>
+
+  <section class="bg-gradient-to-r from-gray-700/20 to-gray-800/20 rounded-xl p-6 border border-gray-600/30">
+    <div class="flex items-center mb-6">
+      <span class="text-3xl mr-4">📋</span>
+      <h2 class="text-2xl font-bold text-white">Expert Final Rating</h2>
+    </div>
+    
+    <div class="bg-black/50 rounded-lg p-6 border border-gray-600/30 text-center">
+      <div class="text-6xl font-bold text-red-400 mb-4">{expert_grade}</div>
+      <p class="text-gray-400 text-xl mb-4">Professional Security Grade</p>
+      <div class="bg-red-500/20 rounded-lg p-4 border border-red-400/30">
+        <p class="text-xl text-red-300 font-bold">
+          RECOMMENDATION: {risk_category.replace('_', ' ')}
+        </p>
+      </div>
+    </div>
+  </section>
+
 </div>
 
-PASTIKAN untuk menyebutkan:
-- Status verifikasi kontrak
-- Hasil deteksi honeypot
-- Analisis kepemilikan (ownership)
-- Trust score keseluruhan
+**ANALYSIS REQUIREMENTS:**
+1. **Be Consistent**: Your assessment MUST match the trust score and vulnerability data
+2. **Be Specific**: Reference the actual vulnerabilities found (reentrancy, arbitrary-send-eth)
+3. **Be Professional**: Explain WHY this is high risk based on technical evidence
+4. **Be Actionable**: Give clear recommendations for this risk level
+5. **Be Honest**: Don't sugarcoat - if data shows high risk, confirm it
 
-Data:
-- Security Score: {metrics.security_score}/100
-- Trust Score: {metrics.trust_score}/100
-- Total Issues: {metrics.total_issues}
-- Critical: {metrics.critical_issues}, High: {metrics.high_issues}, Medium: {metrics.medium_issues}
-{additional_context}
-- Top 5 issues:
-{chr(10).join(f"- {v.type} ({v.severity}): {v.description}" for v in vulnerabilities[:5])}
+Remember: Your credibility as an expert depends on being consistent with the technical analysis. The system found {metrics.high_issues} high-severity issues - acknowledge and explain them!
 """
 
     try:
-        model = genai.GenerativeModel("gemini-2.0-flash")
-        response = model.generate_content(prompt)
-        return clean_ai_html_output(response.text)
+        headers = {
+            "Authorization": f"Bearer {TOGETHER_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "model": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+            "messages": [
+                {
+                    "role": "user", 
+                    "content": prompt
+                }
+            ],
+            "max_tokens": 3500,
+            "temperature": 0.5,
+            "top_p": 0.9
+        }
+        
+        response = requests.post(
+            "https://api.together.xyz/v1/chat/completions",
+            headers=headers,
+            json=payload,
+            timeout=60
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            ai_content = result["choices"][0]["message"]["content"]
+            
+            cleaned_content = clean_ai_html_output(ai_content)
+            
+            if cleaned_content.startswith('<div class="space-y-'):
+                return cleaned_content
+            else:
+                print("AI returned invalid format, using data-consistent fallback")
+                return generate_data_consistent_fallback(metrics, contract_info, ownership_analysis, trading_analysis, social_presence, contract_stats, vulnerabilities)
+        else:
+            print(f"Together AI API error: {response.status_code}")
+            return generate_data_consistent_fallback(metrics, contract_info, ownership_analysis, trading_analysis, social_presence, contract_stats, vulnerabilities)
 
     except Exception as e:
         print(f"AI Summary error: {e}")
-        # Enhanced fallback
-        verification_status = "✅ Terverifikasi" if contract_info.is_verified else "❌ Tidak Terverifikasi"
-        honeypot_status = "🚨 RISIKO HONEYPOT TINGGI" if trading_analysis.is_honeypot else "✅ Tidak terdeteksi honeypot"
-        
-        return f"""
-        <div class="space-y-6 text-gray-200 text-base leading-relaxed">
-          <section>
-            <h2 class="text-lg font-semibold">🔐 Status Keamanan Umum</h2>
-            <p>Trust Score: <strong>{metrics.trust_score}/100</strong></p>
-            <p>Kontrak ini memiliki beberapa hal yang perlu diperhatikan untuk penggunaan yang aman.</p>
-          </section>
+        return generate_data_consistent_fallback(metrics, contract_info, ownership_analysis, trading_analysis, social_presence, contract_stats, vulnerabilities)
 
-          <section>
-            <h2 class="text-lg font-semibold text-blue-400">📊 Statistik Keamanan</h2>
-            <ul class="list-disc pl-5 text-gray-300 space-y-1">
-              <li>Security Score: <strong>{metrics.security_score}/100</strong></li>
-              <li>Total masalah: <strong>{metrics.total_issues}</strong></li>
-              <li>Risiko tinggi: <strong>{metrics.high_issues}</strong>, sedang: <strong>{metrics.medium_issues}</strong></li>
-            </ul>
-          </section>
+def generate_data_consistent_fallback(
+    metrics: SecurityMetrics,
+    contract_info: ContractInfo, 
+    ownership_analysis: OwnershipAnalysis,
+    trading_analysis: TradingAnalysis,
+    social_presence: SocialPresence,
+    contract_stats: Dict = None,
+    vulnerabilities: List[VulnerabilityDetail] = None
+) -> str:
+    """Fallback that matches the ACTUAL scoring system"""
+    
+    contract_age = contract_stats.get("contract_age_days", 0) if contract_stats else 0
+    
+    # Get vulnerability breakdown
+    high_vulns = [v for v in vulnerabilities if v.severity == "High"] if vulnerabilities else []
+    critical_vulns = [v for v in vulnerabilities if v.severity == "Critical"] if vulnerabilities else []
+    
+    # CORRECT grading based on ACTUAL system logic
+    if trading_analysis.is_honeypot:
+        expert_grade = "F"
+        risk_assessment = "CRITICAL - HONEYPOT DETECTED"
+        grade_color = "text-red-600"
+    elif metrics.trust_score < 30:
+        expert_grade = "F"
+        risk_assessment = "CRITICAL - AVOID COMPLETELY"
+        grade_color = "text-red-600"
+    elif metrics.trust_score < 40:
+        expert_grade = "D"
+        risk_assessment = "HIGH RISK - Expert users only"
+        grade_color = "text-red-500"
+    elif metrics.trust_score < 60:  # 40-60 = MEDIUM (seperti contoh: 52/100)
+        expert_grade = "C"
+        risk_assessment = "MEDIUM RISK - Use with caution"
+        grade_color = "text-orange-400"
+    elif metrics.trust_score < 75:
+        expert_grade = "B"
+        risk_assessment = "ACCEPTABLE RISK - Generally safe"
+        grade_color = "text-yellow-400"
+    else:
+        expert_grade = "A"
+        risk_assessment = "LOW RISK - Safe to use"
+        grade_color = "text-green-400"
 
-          <section>
-            <h2 class="text-lg font-semibold text-purple-400">🔍 Analisis Tambahan</h2>
-            <ul class="list-disc pl-5 text-gray-300 space-y-1">
-              <li>Status Verifikasi: <strong>{verification_status}</strong></li>
-              <li>Honeypot Check: <strong>{honeypot_status}</strong></li>
-              <li>Ownership Risk: <strong>{ownership_analysis.centralization_risk}</strong></li>
-              <li>Admin Functions: <strong>{len(ownership_analysis.admin_functions)} ditemukan</strong></li>
-            </ul>
-          </section>
+    # Determine risk explanation based on actual data
+    risk_explanation = ""
+    if metrics.trust_score >= 40 and metrics.trust_score < 60:
+        risk_explanation = f"Trust score {metrics.trust_score}/100 menempatkan kontrak ini pada kategori MEDIUM RISK. Faktor positif seperti verified contract dan no honeypot detection mencegah klasifikasi HIGH RISK, namun adanya {len(high_vulns)} high-severity vulnerability dan contract age {contract_age} hari masih memerlukan kehati-hatian."
+    elif metrics.trust_score < 40:
+        risk_explanation = f"Trust score {metrics.trust_score}/100 menunjukkan HIGH RISK dengan multiple security concerns yang signifikan."
+    else:
+        risk_explanation = f"Trust score {metrics.trust_score}/100 menunjukkan profil risiko yang dapat diterima dengan mitigasi yang memadai."
 
-          <section>
-            <h2 class="text-lg font-semibold text-red-400">⚠️ Hal yang Perlu Diperhatikan</h2>
-            <ul class="list-disc pl-5 text-gray-300 space-y-1">
-              <li>Periksa kembali status verifikasi kontrak</li>
-              <li>Waspadai fungsi admin yang dapat mengubah aturan</li>
-              <li>Lakukan transaksi test dengan jumlah kecil terlebih dahulu</li>
-            </ul>
-          </section>
+    return f"""
+    <div class="space-y-8 text-gray-200 text-base leading-relaxed">
 
-          <section>
-            <h2 class="text-lg font-semibold text-green-400">✅ Rekomendasi untuk Pengguna</h2>
-            <ul class="list-disc pl-5 text-gray-300 space-y-2">
-              <li>Gunakan kontrak dengan hati-hati dan lakukan riset tambahan</li>
-              <li>Jangan investasi lebih dari yang mampu Anda kehilangan</li>
-              <li>Periksa kembali alamat kontrak sebelum bertransaksi</li>
-              <li>Gunakan wallet yang terpercaya dengan fitur keamanan</li>
-            </ul>
-          </section>
+      <section class="bg-gradient-to-r from-orange-600/20 to-amber-600/20 rounded-xl p-6 border border-orange-400/30">
+        <div class="flex items-center mb-6">
+          <span class="text-3xl mr-4">⚠️</span>
+          <h2 class="text-2xl font-bold text-orange-300">EXPERT SECURITY ASSESSMENT</h2>
         </div>
-        """
+        
+        <div class="bg-orange-500/20 rounded-lg p-5 border border-orange-400/30 mb-6">
+          <h3 class="text-orange-300 font-bold text-xl mb-3">📊 MEDIUM RISK CONFIRMED</h3>
+          <p class="text-gray-300 leading-relaxed text-lg">
+            {risk_explanation}
+          </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-black/40 rounded-lg p-4 border border-orange-400/20">
+            <h4 class="text-orange-300 font-bold mb-2">🎯 Security Concerns</h4>
+            <p class="text-gray-300 text-sm">
+              {f'{len(high_vulns)} high-severity issue detected' if len(high_vulns) > 0 else 'No high-severity issues detected'}: {high_vulns[0].type if high_vulns else 'Minor security concerns only'}
+            </p>
+          </div>
+          
+          <div class="bg-black/40 rounded-lg p-4 border border-orange-400/20">
+            <h4 class="text-orange-300 font-bold mb-2">⏰ Maturity Assessment</h4>
+            <p class="text-gray-300 text-sm">
+              Contract age: <strong>{contract_age} hari</strong> = {'Very new protocol requiring careful observation' if contract_age < 7 else 'Young protocol with limited track record' if contract_age < 30 else 'Maturing protocol with growing track record'}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 rounded-xl p-6 border border-blue-400/30">
+        <div class="flex items-center mb-6">
+          <span class="text-3xl mr-4">🔬</span>
+          <h2 class="text-2xl font-bold text-blue-300">Technical Analysis</h2>
+        </div>
+        
+        <div class="space-y-4">
+          <div class="bg-black/40 rounded-lg p-5 border border-blue-400/20">
+            <h3 class="text-blue-300 font-bold text-lg mb-3">⚖️ Risk-Benefit Analysis</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h4 class="text-green-300 font-bold mb-2">✅ Positive Factors</h4>
+                <ul class="text-gray-300 text-sm space-y-1">
+                  {f'<li>• Contract verified on blockchain explorer</li>' if contract_info.is_verified else ''}
+                  {f'<li>• No honeypot mechanism detected</li>' if not trading_analysis.is_honeypot else ''}
+                  {f'<li>• Low centralization risk</li>' if ownership_analysis.centralization_risk == 'Low' else ''}
+                  {f'<li>• Reasonable social presence ({social_presence.social_score}/100)</li>' if social_presence.social_score > 50 else ''}
+                </ul>
+              </div>
+              <div>
+                <h4 class="text-orange-300 font-bold mb-2">⚠️ Concern Areas</h4>
+                <ul class="text-gray-300 text-sm space-y-1">
+                  {f'<li>• {len(high_vulns)} high-severity vulnerability: {high_vulns[0].type if high_vulns else "None"}</li>' if high_vulns else ''}
+                  <li>• Very young contract ({contract_age} days old)</li>
+                  <li>• Limited operational history</li>
+                  {f'<li>• {metrics.total_issues} total issues detected</li>' if metrics.total_issues > 5 else ''}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="bg-gradient-to-r from-purple-600/20 to-indigo-600/20 rounded-xl p-6 border border-purple-400/30">
+        <div class="flex items-center mb-6">
+          <span class="text-3xl mr-4">🎯</span>
+          <h2 class="text-2xl font-bold text-purple-300">Expert Recommendations</h2>
+        </div>
+        
+        <div class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-black/40 rounded-lg p-5 border border-purple-400/20">
+              <h3 class="text-purple-300 font-bold text-lg mb-3">🏢 For Institutional Use</h3>
+              <p class="text-gray-300 leading-relaxed">
+                {'Enhanced due diligence required. Consider for experimental allocation with strict position limits (max 0.5% portfolio).' if metrics.trust_score >= 50 else 'Not recommended for institutional use due to risk profile.'}
+              </p>
+            </div>
+            
+            <div class="bg-black/40 rounded-lg p-5 border border-purple-400/20">
+              <h3 class="text-purple-300 font-bold text-lg mb-3">👤 For Retail Users</h3>
+              <p class="text-gray-300 leading-relaxed">
+                {'Suitable for experienced users with proper risk management. Start with small test transactions.' if metrics.trust_score >= 40 else 'High risk - only for expert users who fully understand the implications.'}
+              </p>
+            </div>
+          </div>
+          
+          <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-600/30">
+            <h4 class="text-gray-300 font-bold mb-2">🔧 Practical Usage Guidelines:</h4>
+            <ul class="text-gray-300 text-sm space-y-1">
+              <li>• Start with minimal test transactions to verify functionality</li>
+              <li>• Monitor contract behavior closely during initial weeks</li>
+              <li>• Set up alerts for unusual activity patterns</li>
+              <li>• Consider waiting for contract to mature (30+ days) before significant use</li>
+              <li>• Keep transaction amounts within acceptable loss limits</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="bg-gradient-to-r from-gray-700/20 to-gray-800/20 rounded-xl p-6 border border-gray-600/30">
+        <div class="flex items-center mb-6">
+          <span class="text-3xl mr-4">📋</span>
+          <h2 class="text-2xl font-bold text-white">Expert Final Assessment</h2>
+        </div>
+        
+        <div class="bg-black/50 rounded-lg p-6 border border-gray-600/30 text-center">
+          <div class="text-6xl font-bold {grade_color} mb-4">{expert_grade}</div>
+          <p class="text-gray-400 text-xl mb-4">Professional Security Grade</p>
+          <div class="bg-orange-500/20 rounded-lg p-4 border border-orange-400/30">
+            <p class="text-xl font-bold mb-2">
+              <span class="text-orange-300">{risk_assessment}</span>
+            </p>
+            <p class="text-gray-300 mb-4">
+              Trust Score: {metrics.trust_score}/100 | Security Issues: {metrics.total_issues} total ({len(high_vulns)} high-severity)
+            </p>
+            <p class="text-gray-300 text-sm">
+              <strong>Bottom Line:</strong> {'Moderate risk suitable for cautious use with proper precautions. Verified contract with some security concerns that require monitoring.' if metrics.trust_score >= 40 else 'High risk profile requiring expert evaluation before any interaction.'}
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+    """
 
 def generate_recommendations(vulnerabilities: List[VulnerabilityDetail], contract_info: ContractInfo, ownership_analysis: OwnershipAnalysis) -> List[str]:
     """Generate prioritized recommendations"""
@@ -1584,7 +1876,7 @@ def audit_contract(data: ContractRequest):
         # 8. ✨ Generate comprehensive AI analysis
         print("🤖 Generating AI security analysis...")
         ai_summary = generate_detailed_summary(
-            vulnerabilities, metrics, contract_info, ownership_analysis, trading_analysis
+            vulnerabilities, metrics, contract_info, ownership_analysis, trading_analysis, social_presence, contract_stats
         )
         
         recommendations = generate_recommendations(vulnerabilities, contract_info, ownership_analysis)
