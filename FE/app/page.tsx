@@ -27,8 +27,6 @@ import {
   EyeOff,
   Download,
   Share2,
-  Bookmark,
-  BookmarkCheck,
   Sparkles,
   Target,
   Timer,
@@ -256,24 +254,17 @@ const ContractSafetyChecker = () => {
     setExpandedVulns((prev) => (prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]))
   }
 
-  const shareReport = async () => {
+  const downloadReport = () => {
     if (!auditData) return
-    const shareData = {
-      title: "Smart Contract Security Report",
-      text: `Security analysis for ${auditData.contract_address}: ${auditData.risk_level} risk level`,
-      url: window.location.href,
-    }
-
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData)
-        showToast("success", "Report shared successfully!")
-      } catch (err) {
-        copyToClipboard(window.location.href)
-      }
-    } else {
-      copyToClipboard(window.location.href)
-    }
+    const report = JSON.stringify(auditData, null, 2)
+    const blob = new Blob([report], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `security-report-${auditData.contract_address}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    showToast("success", "Security report downloaded!")
   }
 
   const getUserRiskLevel = (risk?: string): string => {
@@ -860,14 +851,12 @@ const ContractSafetyChecker = () => {
           <div className="space-y-10">
             {/* Action Bar */}
             <div className="flex flex-wrap justify-center gap-4 mb-8">
-              
-
               <button
-                onClick={shareReport}
-                className="flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 bg-purple-500/20 text-purple-300 border-purple-500/30 hover:bg-purple-500/30"
+                onClick={downloadReport}
+                className="flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all duration-300 bg-blue-500/20 text-blue-300 border-blue-500/30 hover:bg-blue-500/30"
               >
-                <Share2 className="w-5 h-5" />
-                <span>Share Report</span>
+                <Download className="w-5 h-5" />
+                <span>Download Report</span>
               </button>
 
               <button
