@@ -1437,11 +1437,41 @@ def generate_gas_optimization_hints(vulnerabilities: List[VulnerabilityDetail]) 
     
     return hints[:5]  # Return top 5 hints
 
-# ✅ SINGLE AUDIT ENDPOINT - NO DUPLICATES
+def quick_validate_contract(address: str, chain: str) -> dict:
+    """Quick validation check - return error dict if invalid, None if valid"""
+    
+    # 1. Validasi format address
+    if not address or len(address) != 42 or not address.startswith('0x'):
+        return {"error": "Invalid address format", "status_code": 400}
+    
+    try:
+        int(address[2:], 16)
+    except ValueError:
+        return {"error": "Invalid address format", "status_code": 400}
+    
+    # 2. Cek contract exists & verified
+    try:
+        etherscan_api = EtherscanAPI(chain)
+        contract_info = etherscan_api.get_contract_info(address)
+        
+        # Cek apakah contract ada
+        if not contract_info.contract_name:
+            return {"error": "Contract not found or is EOA", "status_code": 404}
+        
+        # Cek apakah verified
+        if not contract_info.is_verified:
+            return {"error": f"Contract not verified. Please verify at {CHAIN_CONFIGS[chain]['explorer']}", "status_code": 400}
+        
+        # Valid - tidak ada error
+        return None
+        
+    except Exception as e:
+        return {"error": f"Validation failed: {str(e)}", "status_code": 500}
+
 @app.post("/audit-contract", response_model=AuditResult) 
 def audit_contract(data: ContractRequest):
-    """✅ FINAL: Now saves complete audit result instead of raw slither"""
-    
+    """✅ UPDATED: Contract audit with quick validation first"""
+
     # Enhanced input validation
     if not data.address or not isinstance(data.address, str):
         raise HTTPException(
@@ -1470,6 +1500,19 @@ def audit_contract(data: ContractRequest):
             status_code=400,
             detail=f"Unsupported chain: {chain}. Supported: {list(CHAIN_CONFIGS.keys())}"
         )
+    
+    # 🚀 QUICK VALIDATION FIRST - Save time if invalid
+    print(f"🔍 Quick validation for {address} on {chain}...")
+    validation_error = quick_validate_contract(address, chain)
+    
+    if validation_error:
+        print(f"❌ Validation failed: {validation_error['error']}")
+        raise HTTPException(
+            status_code=validation_error["status_code"],
+            detail=validation_error["error"]
+        )
+    
+    print(f"✅ Quick validation passed - proceeding with full audit...")
     
     temp_file = None
     temp_slither_file = None
