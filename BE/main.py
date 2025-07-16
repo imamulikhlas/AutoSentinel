@@ -25,31 +25,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✨ ENHANCED CHAIN CONFIGS dengan fallback
 CHAIN_CONFIGS = {
     "ethereum": {
-        "api_url": "https://api.etherscan.io/api",
-        "api_key_env": "ETHERSCAN_API_KEY",
+        "chain_id": 1,
         "explorer": "https://etherscan.io",
-        "fallback_api": "YourApiKeyToken"  # Free tier fallback
+        "name": "Ethereum Mainnet"
     },
     "polygon": {
-        "api_url": "https://api.polygonscan.com/api", 
-        "api_key_env": "POLYGONSCAN_API_KEY",
-        "explorer": "https://polygonscan.com",
-        "fallback_api": "YourApiKeyToken"
+        "chain_id": 137,
+        "explorer": "https://polygonscan.com", 
+        "name": "Polygon"
     },
     "bsc": {
-        "api_url": "https://api.bscscan.com/api",
-        "api_key_env": "BSCSCAN_API_KEY", 
+        "chain_id": 56,
         "explorer": "https://bscscan.com",
-        "fallback_api": "YourApiKeyToken"
+        "name": "BSC"
     },
     "arbitrum": {
-        "api_url": "https://api.arbiscan.io/api",
-        "api_key_env": "ARBISCAN_API_KEY",
+        "chain_id": 42161,
         "explorer": "https://arbiscan.io",
-        "fallback_api": "YourApiKeyToken"
+        "name": "Arbitrum"
+    },
+    "optimism": {
+        "chain_id": 10,
+        "explorer": "https://optimistic.etherscan.io",
+        "name": "Optimism"
+    },
+    "base": {
+        "chain_id": 8453,
+        "explorer": "https://basescan.org",
+        "name": "Base"
     }
 }
 
@@ -138,15 +143,18 @@ class EtherscanAPI:
             raise ValueError(f"Unsupported chain: {chain}")
         
         self.config = CHAIN_CONFIGS[self.chain]
-        self.api_url = self.config["api_url"]
-        self.api_key = os.getenv(self.config["api_key_env"]) or self.config["fallback_api"]
+        # ✨ FIXED: Use unified v2 API endpoint
+        self.api_url = "https://api.etherscan.io/v2/api"
+        # ✨ FIXED: Single API key for all chains
+        self.api_key = os.getenv("ETHERSCAN_API_KEY") or "YourApiKeyToken"
+        self.chain_id = self.config["chain_id"]
         self.session = requests.Session()
         
     def get_contract_info(self, address: str) -> ContractInfo:
-        """✅ REAL: Get real contract verification info"""
+        """✅ FIXED: Using unified v2 API with chain parameter"""
         try:
-            # Get contract source code info (already fetched by EnhancedRealContractFetcher)
             params = {
+                "chainid": self.chain_id,  # ✨ NEW: chain parameter
                 "module": "contract",
                 "action": "getsourcecode",
                 "address": address,
@@ -161,7 +169,7 @@ class EtherscanAPI:
                 
                 return ContractInfo(
                     is_verified=bool(result.get("SourceCode", "")),
-                    verification_date=None,  # API doesn't provide this
+                    verification_date=None,
                     compiler_version=result.get("CompilerVersion", ""),
                     contract_name=result.get("ContractName", ""),
                     proxy_type="proxy" if result.get("Proxy", "0") == "1" else None,
@@ -175,7 +183,7 @@ class EtherscanAPI:
             return ContractInfo(is_verified=False)
     
     def get_contract_stats(self, address: str) -> Dict:
-        """✅ REAL: Get real contract statistics"""
+        """✅ FIXED: Using unified v2 API with chain parameter"""
         try:
             stats = {
                 "contract_age_days": 0,
@@ -186,6 +194,7 @@ class EtherscanAPI:
             
             # 1. Get contract creation transaction
             creation_params = {
+                "chainid": self.chain_id,  # ✨ NEW: chain parameter
                 "module": "account",
                 "action": "txlist",
                 "address": address,
@@ -207,20 +216,21 @@ class EtherscanAPI:
                     creation_date = datetime.fromtimestamp(creation_timestamp)
                     stats["contract_age_days"] = (datetime.now() - creation_date).days
             
-            # 2. Get recent transactions to estimate activity
+            # 2. Get recent transactions
             recent_params = {
+                "chainid": self.chain_id,  # ✨ NEW: chain parameter
                 "module": "account",
                 "action": "txlist",
                 "address": address,
                 "startblock": 0,
                 "endblock": 99999999,
                 "page": 1,
-                "offset": 1000,  # Get more recent transactions
+                "offset": 1000,
                 "sort": "desc",
                 "apikey": self.api_key
             }
             
-            time.sleep(0.2)  # Rate limiting
+            time.sleep(0.2)
             response = self.session.get(self.api_url, params=recent_params, timeout=30)
             data = response.json()
             
@@ -228,16 +238,16 @@ class EtherscanAPI:
                 transactions = data["result"]
                 stats["transaction_count"] = len(transactions)
                 
-                # Count unique users (from addresses)
                 unique_addresses = set()
                 for tx in transactions:
                     unique_addresses.add(tx.get("from", "").lower())
                     unique_addresses.add(tx.get("to", "").lower())
                 
-                stats["unique_users"] = len(unique_addresses) - 1  # Exclude contract itself
+                stats["unique_users"] = len(unique_addresses) - 1
             
             # 3. Get contract balance
             balance_params = {
+                "chainid": self.chain_id,  # ✨ NEW: chain parameter
                 "module": "account",
                 "action": "balance",
                 "address": address,
@@ -245,13 +255,13 @@ class EtherscanAPI:
                 "apikey": self.api_key
             }
             
-            time.sleep(0.2)  # Rate limiting
+            time.sleep(0.2)
             response = self.session.get(self.api_url, params=balance_params, timeout=30)
             data = response.json()
             
             if data.get("status") == "1" and data.get("result"):
                 balance_wei = int(data["result"])
-                stats["balance_eth"] = balance_wei / 10**18  # Convert wei to ETH
+                stats["balance_eth"] = balance_wei / 10**18
             
             return stats
             
@@ -268,8 +278,7 @@ class HoneypotDetector:
     def __init__(self):
         # Multiple honeypot detection APIs
         self.apis = [
-            "https://api.honeypot.is/v2/IsHoneypot",
-            "https://aywt3wreda.execute-api.eu-west-1.amazonaws.com/default/IsHoneypot"
+            "https://api.honeypot.is/v2/IsHoneypot"
         ]
         self.session = requests.Session()
         
@@ -835,7 +844,7 @@ def calculate_trust_score(
     return int(final_score)
 
 class EnhancedRealContractFetcher:
-    """✨ ENHANCED: Robust real contract fetcher with multiple fallbacks"""
+    """✨ FIXED: Using unified v2 API"""
     
     def __init__(self, chain: str):
         self.chain = chain.lower()
@@ -843,14 +852,11 @@ class EnhancedRealContractFetcher:
             raise ValueError(f"Unsupported chain: {chain}")
         
         self.config = CHAIN_CONFIGS[self.chain]
-        self.api_url = self.config["api_url"]
-        self.api_key = os.getenv(self.config["api_key_env"])
-        
-        # ✨ Use fallback if no API key provided
-        if not self.api_key:
-            self.api_key = self.config["fallback_api"]
-            print(f"⚠️ Using fallback API key for {self.chain}")
-        
+        # ✨ FIXED: Use unified v2 API endpoint
+        self.api_url = "https://api.etherscan.io/v2/api"
+        # ✨ FIXED: Single API key for all chains
+        self.api_key = os.getenv("ETHERSCAN_API_KEY") or "YourApiKeyToken"
+        self.chain_id = self.config["chain_id"]
         self.explorer = self.config["explorer"]
         self.session = requests.Session()
         self.session.headers.update({
@@ -862,12 +868,10 @@ class EnhancedRealContractFetcher:
         if not address or not isinstance(address, str):
             return False
         
-        # Remove 0x prefix if present
         addr = address.lower()
         if addr.startswith('0x'):
             addr = addr[2:]
         
-        # Check length and hex format
         if len(addr) != 40:
             return False
         
@@ -878,16 +882,17 @@ class EnhancedRealContractFetcher:
             return False
     
     def fetch_contract_source(self, address: str, retry_count: int = 3) -> Dict:
-        """✨ ENHANCED: Fetch contract source with robust error handling"""
+        """✅ FIXED: Using unified v2 API with chain parameter"""
         
         if not self.validate_address(address):
             raise ValueError(f"Invalid contract address format: {address}")
         
         for attempt in range(retry_count):
             try:
-                print(f"🔍 Attempt {attempt + 1}: Fetching contract source for {address} on {self.chain}...")
+                print(f"🔍 Attempt {attempt + 1}: Fetching contract source for {address} on {self.config['name']}...")
                 
                 params = {
+                    "chainid": self.chain_id,  # ✨ NEW: unified API with chain parameter
                     "module": "contract",
                     "action": "getsourcecode", 
                     "address": address,
@@ -903,7 +908,6 @@ class EnhancedRealContractFetcher:
                 
                 data = response.json()
                 
-                # ✨ Enhanced response validation
                 if not isinstance(data, dict):
                     raise ValueError("Invalid API response format")
                 
@@ -926,11 +930,10 @@ class EnhancedRealContractFetcher:
                 if not source_code or source_code.strip() == "":
                     raise ValueError(
                         f"Contract source code not available. "
-                        f"Contract {address} may not be verified on {self.chain}. "
+                        f"Contract {address} may not be verified on {self.config['name']}. "
                         f"Please verify the contract on {self.explorer}"
                     )
                 
-                # ✨ Enhanced contract data extraction
                 result = {
                     "source_code": source_code,
                     "contract_name": contract_data.get("ContractName", "Unknown"),
@@ -944,7 +947,7 @@ class EnhancedRealContractFetcher:
                     "swarm_source": contract_data.get("SwarmSource", "")
                 }
                 
-                print(f"✅ Successfully fetched contract: {result['contract_name']}")
+                print(f"✅ Successfully fetched contract: {result['contract_name']} on {self.config['name']}")
                 return result
                 
             except requests.exceptions.Timeout:
@@ -977,14 +980,14 @@ class EnhancedRealContractFetcher:
         
         raise ValueError("All retry attempts failed")
     
+    # Rest of the methods remain the same...
     def process_source_code(self, source_code: str, contract_name: str = "") -> str:
-        """✨ ENHANCED: Process and clean source code for Slither analysis"""
+        """Process and clean source code for Slither analysis"""
         
         if not source_code or source_code.strip() == "":
             raise ValueError("Empty source code provided")
         
         try:
-            # Handle multi-file contracts (JSON format)
             if source_code.strip().startswith('{'):
                 return self._process_multi_file_contract(source_code, contract_name)
             else:
@@ -999,11 +1002,9 @@ class EnhancedRealContractFetcher:
             parsed = json.loads(source_code)
             
             if "sources" in parsed:
-                # Find main contract file
                 main_file = None
                 main_filename = None
                 
-                # Try to find file with matching contract name
                 if contract_name:
                     for filename, file_data in parsed["sources"].items():
                         if contract_name.lower() in filename.lower():
@@ -1011,12 +1012,11 @@ class EnhancedRealContractFetcher:
                             main_filename = filename
                             break
                 
-                # Fallback: find any .sol file
                 if not main_file:
                     for filename, file_data in parsed["sources"].items():
                         if filename.endswith('.sol'):
                             content = file_data.get("content", "")
-                            if content and len(content) > 100:  # Non-trivial file
+                            if content and len(content) > 100:
                                 main_file = content
                                 main_filename = filename
                                 break
@@ -1030,7 +1030,6 @@ class EnhancedRealContractFetcher:
                 raise ValueError("Invalid multi-file contract format - missing 'sources'")
                 
         except json.JSONDecodeError as e:
-            # Maybe it's not JSON, treat as single file
             print("⚠️ JSON decode failed, treating as single file")
             return self._process_single_file_contract(source_code)
     
@@ -1038,11 +1037,9 @@ class EnhancedRealContractFetcher:
         """Process single file contract"""
         cleaned = source_code.strip()
         
-        # Remove extra braces that sometimes appear
         if cleaned.startswith('{{') and cleaned.endswith('}}'):
             cleaned = cleaned[1:-1].strip()
         elif cleaned.startswith('{') and cleaned.endswith('}') and not cleaned.startswith('{"'):
-            # Sometimes single files are wrapped in braces
             cleaned = cleaned[1:-1].strip()
         
         return self._clean_solidity_code(cleaned)
@@ -1054,52 +1051,44 @@ class EnhancedRealContractFetcher:
         if not cleaned:
             raise ValueError("Empty code after cleaning")
         
-        # Basic Solidity validation
         has_pragma = bool(re.search(r'pragma\s+solidity', cleaned, re.IGNORECASE))
         has_contract = bool(re.search(r'(contract|interface|library)\s+\w+', cleaned, re.IGNORECASE))
         
         if not has_pragma and not has_contract:
             raise ValueError("Invalid Solidity code - missing pragma or contract declaration")
         
-        # Add pragma if missing but has contract
         if not has_pragma and has_contract:
             print("⚠️ Adding missing pragma directive")
             cleaned = "pragma solidity ^0.8.0;\n\n" + cleaned
         
-        # Remove potential problematic characters
         cleaned = re.sub(r'[\x00-\x08\x0b-\x0c\x0e-\x1f\x7f-\x9f]', '', cleaned)
         
         return cleaned
     
     def save_contract_to_file(self, source_code: str, contract_name: str, address: str) -> str:
-        """✨ ENHANCED: Save contract with better error handling"""
+        """Save contract with better error handling"""
         try:
-            # Create contracts directory
             contracts_dir = "temp_contracts"
             os.makedirs(contracts_dir, exist_ok=True)
             
-            # Process source code
             processed_source = self.process_source_code(source_code, contract_name)
             
-            # Generate safe filename
             safe_name = re.sub(r'[^a-zA-Z0-9_]', '_', contract_name or "Contract")
-            safe_name = safe_name[:20]  # Limit length
+            safe_name = safe_name[:20]
             
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"{safe_name}_{address[:10]}_{timestamp}.sol"
             filepath = os.path.join(contracts_dir, filename)
             
-            # Save with encoding handling
             with open(filepath, 'w', encoding='utf-8', errors='ignore') as f:
                 f.write(processed_source)
             
-            # Validate file was written correctly
             if not os.path.exists(filepath):
                 raise ValueError("Failed to write contract file")
             
             with open(filepath, 'r', encoding='utf-8') as f:
                 content = f.read()
-                if len(content) < 50:  # Too small to be valid
+                if len(content) < 50:
                     raise ValueError("Generated file is too small")
             
             print(f"✅ Contract saved to: {filepath}")
