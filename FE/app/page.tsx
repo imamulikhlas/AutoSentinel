@@ -41,6 +41,7 @@ import {
 } from "lucide-react"
 
 const ContractSafetyChecker = () => {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL
   const [auditData, setAuditData] = useState<AuditData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -185,7 +186,7 @@ const ContractSafetyChecker = () => {
     }, 200)
 
     try {
-      const response = await fetch("http://localhost:8000/audit-contract", {
+      const response = await fetch(`${baseUrl}/audit-contract`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ address, chain }),
@@ -221,7 +222,7 @@ const ContractSafetyChecker = () => {
     setHistLoad(true)
     setHistError(null)
     try {
-      const res = await fetch(`http://localhost:8000/audit-history/${addr}`)
+      const res = await fetch(`${baseUrl}/audit-history/${addr}`)
       if (!res.ok) throw new Error("Failed to fetch history")
       const data = await res.json()
       setHistory(data.history || [])
@@ -1497,7 +1498,7 @@ const ContractSafetyChecker = () => {
                           setLoading(true)
                           try {
                             const res = await fetch(
-                              `http://localhost:8000/load-audit-file?path=${encodeURIComponent(h.file_path)}&address=${address}&chain=${chain}`,
+                              `${baseUrl}/load-audit-file?path=${encodeURIComponent(h.file_path)}&address=${address}&chain=${chain}`,
                             )
                             const result: AuditData = await res.json()
                             setAuditData(result)
