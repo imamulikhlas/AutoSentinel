@@ -1299,12 +1299,12 @@ def generate_detailed_summary(
     if not vulnerabilities and contract_info.is_verified and not trading_analysis.is_honeypot:
         return """
         <div class="space-y-6 text-gray-200 text-base leading-relaxed">
-          <section class="bg-gradient-to-r from-emerald-600/20 to-green-600/20 rounded-xl p-6 border border-emerald-400/30">
+          <section class="bg-gradient-to-r from-emerald-600/20 to-green-600/20 rounded-xl p-6 border-emerald-400/30">
             <div class="flex items-center mb-4">
               <span class="text-3xl mr-4">🎖️</span>
               <h2 class="text-2xl font-bold text-emerald-300">Expert Assessment: Premium Grade Protocol</h2>
             </div>
-            <div class="bg-emerald-500/10 rounded-lg p-4 border border-emerald-400/20">
+            <div class="bg-emerald-500/10 rounded-lg p-4 border-emerald-400/20">
               <p class="text-lg font-medium text-emerald-200">Sebagai blockchain security expert, saya menilai kontrak ini memiliki security posture yang exceptional. Clean vulnerability scan + verified codebase + no honeypot indicators = protokol dengan institutional-grade security standards.</p>
             </div>
           </section>
@@ -1371,13 +1371,13 @@ You are a SENIOR BLOCKCHAIN SECURITY EXPERT analyzing a smart contract. You MUST
 
 <div class="space-y-8 text-gray-200 text-base leading-relaxed">
 
-  <section class="bg-gradient-to-r from-red-600/20 to-rose-600/20 rounded-xl p-6 border border-red-400/30">
+  <section class="bg-gradient-to-r from-red-600/20 to-rose-600/20 rounded-xl p-6 border-red-400/30">
     <div class="flex items-center mb-6">
       <span class="text-3xl mr-4">🚨</span>
       <h2 class="text-2xl font-bold text-red-300">EXPERT SECURITY ALERT</h2>
     </div>
     
-    <div class="bg-red-500/20 rounded-lg p-5 border border-red-400/30 mb-6">
+    <div class="bg-red-500/20 rounded-lg p-5 border-red-400/30 mb-6">
       <h3 class="text-red-300 font-bold text-xl mb-3">⚠️ HIGH RISK ASSESSMENT CONFIRMED</h3>
       <p class="text-gray-300 leading-relaxed text-lg">
         Based on my analysis of {metrics.total_issues} security issues including {metrics.high_issues} high-severity vulnerabilities, this contract presents SIGNIFICANT RISK to users. The trust score of {metrics.trust_score}/100 confirms this assessment.
@@ -1385,14 +1385,14 @@ You are a SENIOR BLOCKCHAIN SECURITY EXPERT analyzing a smart contract. You MUST
     </div>
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="bg-black/40 rounded-lg p-4 border border-red-400/20">
+      <div class="bg-black/40 rounded-lg p-4 border-red-400/20">
         <h4 class="text-red-300 font-bold mb-2">🎯 Critical Attack Vectors</h4>
         <p class="text-gray-300 text-sm">
           [Analyze the specific high-severity vulnerabilities found, especially reentrancy and arbitrary-send-eth]
         </p>
       </div>
       
-      <div class="bg-black/40 rounded-lg p-4 border border-red-400/20">
+      <div class="bg-black/40 rounded-lg p-4 border-red-400/20">
         <h4 class="text-red-300 font-bold mb-2">⏰ Maturity Risk</h4>
         <p class="text-gray-300 text-sm">
           Contract age of {contract_age} days = Unproven and high experimental risk
@@ -1401,14 +1401,14 @@ You are a SENIOR BLOCKCHAIN SECURITY EXPERT analyzing a smart contract. You MUST
     </div>
   </section>
 
-  <section class="bg-gradient-to-r from-amber-600/20 to-orange-600/20 rounded-xl p-6 border border-amber-400/30">
+  <section class="bg-gradient-to-r from-amber-600/20 to-orange-600/20 rounded-xl p-6 border-amber-400/30">
     <div class="flex items-center mb-6">
       <span class="text-3xl mr-4">🔬</span>
       <h2 class="text-2xl font-bold text-amber-300">Technical Vulnerability Analysis</h2>
     </div>
     
     <div class="space-y-4">
-      <div class="bg-black/40 rounded-lg p-5 border border-amber-400/20">
+      <div class="bg-black/40 rounded-lg p-5 border-amber-400/20">
         <h3 class="text-amber-300 font-bold text-lg mb-3">⚔️ Exploitation Potential</h3>
         <p class="text-gray-300 leading-relaxed">
           [Detailed analysis of how the vulnerabilities can be exploited, focusing on reentrancy attacks and fund drainage risks]
@@ -1417,13 +1417,13 @@ You are a SENIOR BLOCKCHAIN SECURITY EXPERT analyzing a smart contract. You MUST
     </div>
   </section>
 
-  <section class="bg-gradient-to-r from-purple-600/20 to-indigo-600/20 rounded-xl p-6 border border-purple-400/30">
+  <section class="bg-gradient-to-r from-purple-600/20 to-indigo-600/20 rounded-xl p-6 border-purple-400/30">
     <div class="flex items-center mb-6">
       <span class="text-3xl mr-4">🏭</span>
       <h2 class="text-2xl font-bold text-purple-300">Professional Risk Rating</h2>
     </div>
     
-    <div class="bg-black/40 rounded-lg p-5 border border-purple-400/20">
+    <div class="bg-black/40 rounded-lg p-5 border-purple-400/20">
       <h3 class="text-purple-300 font-bold text-lg mb-3">📊 Expert Verdict</h3>
       <p class="text-gray-300 leading-relaxed">
         [Give specific recommendations based on the high-risk assessment]
@@ -1431,16 +1431,16 @@ You are a SENIOR BLOCKCHAIN SECURITY EXPERT analyzing a smart contract. You MUST
     </div>
   </section>
 
-  <section class="bg-gradient-to-r from-gray-700/20 to-gray-800/20 rounded-xl p-6 border border-gray-600/30">
+  <section class="bg-gradient-to-r from-gray-700/20 to-gray-800/20 rounded-xl p-6 border-gray-600/30">
     <div class="flex items-center mb-6">
       <span class="text-3xl mr-4">📋</span>
       <h2 class="text-2xl font-bold text-white">Expert Final Rating</h2>
     </div>
     
-    <div class="bg-black/50 rounded-lg p-6 border border-gray-600/30 text-center">
+    <div class="bg-black/50 rounded-lg p-6 border-gray-600/30 text-center">
       <div class="text-6xl font-bold text-red-400 mb-4">{expert_grade}</div>
       <p class="text-gray-400 text-xl mb-4">Professional Security Grade</p>
-      <div class="bg-red-500/20 rounded-lg p-4 border border-red-400/30">
+      <div class="bg-red-500/20 rounded-lg p-4 border-red-400/30">
         <p class="text-xl text-red-300 font-bold">
           RECOMMENDATION: {risk_category.replace('_', ' ')}
         </p>
@@ -1560,13 +1560,13 @@ def generate_data_consistent_fallback(
     return f"""
     <div class="space-y-8 text-gray-200 text-base leading-relaxed">
 
-      <section class="bg-gradient-to-r from-orange-600/20 to-amber-600/20 rounded-xl p-6 border border-orange-400/30">
+      <section class="bg-gradient-to-r from-orange-600/20 to-amber-600/20 rounded-xl p-6 border-orange-400/30">
         <div class="flex items-center mb-6">
           <span class="text-3xl mr-4">⚠️</span>
           <h2 class="text-2xl font-bold text-orange-300">EXPERT SECURITY ASSESSMENT</h2>
         </div>
         
-        <div class="bg-orange-500/20 rounded-lg p-5 border border-orange-400/30 mb-6">
+        <div class="bg-orange-500/20 rounded-lg p-5 border-orange-400/30 mb-6">
           <h3 class="text-orange-300 font-bold text-xl mb-3">📊 MEDIUM RISK CONFIRMED</h3>
           <p class="text-gray-300 leading-relaxed text-lg">
             {risk_explanation}
@@ -1574,14 +1574,14 @@ def generate_data_consistent_fallback(
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="bg-black/40 rounded-lg p-4 border border-orange-400/20">
+          <div class="bg-black/40 rounded-lg p-4 border-orange-400/20">
             <h4 class="text-orange-300 font-bold mb-2">🎯 Security Concerns</h4>
             <p class="text-gray-300 text-sm">
               {f'{len(high_vulns)} high-severity issue detected' if len(high_vulns) > 0 else 'No high-severity issues detected'}: {high_vulns[0].type if high_vulns else 'Minor security concerns only'}
             </p>
           </div>
           
-          <div class="bg-black/40 rounded-lg p-4 border border-orange-400/20">
+          <div class="bg-black/40 rounded-lg p-4 border-orange-400/20">
             <h4 class="text-orange-300 font-bold mb-2">⏰ Maturity Assessment</h4>
             <p class="text-gray-300 text-sm">
               Contract age: <strong>{contract_age} hari</strong> = {'Very new protocol requiring careful observation' if contract_age < 7 else 'Young protocol with limited track record' if contract_age < 30 else 'Maturing protocol with growing track record'}
@@ -1590,14 +1590,14 @@ def generate_data_consistent_fallback(
         </div>
       </section>
 
-      <section class="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 rounded-xl p-6 border border-blue-400/30">
+      <section class="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 rounded-xl p-6 border-blue-400/30">
         <div class="flex items-center mb-6">
           <span class="text-3xl mr-4">🔬</span>
           <h2 class="text-2xl font-bold text-blue-300">Technical Analysis</h2>
         </div>
         
         <div class="space-y-4">
-          <div class="bg-black/40 rounded-lg p-5 border border-blue-400/20">
+          <div class="bg-black/40 rounded-lg p-5 border-blue-400/20">
             <h3 class="text-blue-300 font-bold text-lg mb-3">⚖️ Risk-Benefit Analysis</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -1623,7 +1623,7 @@ def generate_data_consistent_fallback(
         </div>
       </section>
 
-      <section class="bg-gradient-to-r from-purple-600/20 to-indigo-600/20 rounded-xl p-6 border border-purple-400/30">
+      <section class="bg-gradient-to-r from-purple-600/20 to-indigo-600/20 rounded-xl p-6 border-purple-400/30">
         <div class="flex items-center mb-6">
           <span class="text-3xl mr-4">🎯</span>
           <h2 class="text-2xl font-bold text-purple-300">Expert Recommendations</h2>
@@ -1631,14 +1631,14 @@ def generate_data_consistent_fallback(
         
         <div class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-black/40 rounded-lg p-5 border border-purple-400/20">
+            <div class="bg-black/40 rounded-lg p-5 border-purple-400/20">
               <h3 class="text-purple-300 font-bold text-lg mb-3">🏢 For Institutional Use</h3>
               <p class="text-gray-300 leading-relaxed">
                 {'Enhanced due diligence required. Consider for experimental allocation with strict position limits (max 0.5% portfolio).' if metrics.trust_score >= 50 else 'Not recommended for institutional use due to risk profile.'}
               </p>
             </div>
             
-            <div class="bg-black/40 rounded-lg p-5 border border-purple-400/20">
+            <div class="bg-black/40 rounded-lg p-5 border-purple-400/20">
               <h3 class="text-purple-300 font-bold text-lg mb-3">👤 For Retail Users</h3>
               <p class="text-gray-300 leading-relaxed">
                 {'Suitable for experienced users with proper risk management. Start with small test transactions.' if metrics.trust_score >= 40 else 'High risk - only for expert users who fully understand the implications.'}
@@ -1646,7 +1646,7 @@ def generate_data_consistent_fallback(
             </div>
           </div>
           
-          <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-600/30">
+          <div class="bg-gray-800/50 rounded-lg p-4 border-gray-600/30">
             <h4 class="text-gray-300 font-bold mb-2">🔧 Practical Usage Guidelines:</h4>
             <ul class="text-gray-300 text-sm space-y-1">
               <li>• Start with minimal test transactions to verify functionality</li>
@@ -1659,16 +1659,16 @@ def generate_data_consistent_fallback(
         </div>
       </section>
 
-      <section class="bg-gradient-to-r from-gray-700/20 to-gray-800/20 rounded-xl p-6 border border-gray-600/30">
+      <section class="bg-gradient-to-r from-gray-700/20 to-gray-800/20 rounded-xl p-6 border-gray-600/30">
         <div class="flex items-center mb-6">
           <span class="text-3xl mr-4">📋</span>
           <h2 class="text-2xl font-bold text-white">Expert Final Assessment</h2>
         </div>
         
-        <div class="bg-black/50 rounded-lg p-6 border border-gray-600/30 text-center">
+        <div class="bg-black/50 rounded-lg p-6 border-gray-600/30 text-center">
           <div class="text-6xl font-bold {grade_color} mb-4">{expert_grade}</div>
           <p class="text-gray-400 text-xl mb-4">Professional Security Grade</p>
-          <div class="bg-orange-500/20 rounded-lg p-4 border border-orange-400/30">
+          <div class="bg-orange-500/20 rounded-lg p-4 border-orange-400/30">
             <p class="text-xl font-bold mb-2">
               <span class="text-orange-300">{risk_assessment}</span>
             </p>
