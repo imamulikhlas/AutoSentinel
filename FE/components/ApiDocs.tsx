@@ -53,7 +53,7 @@ export const ApiDocs = ({ onNavigate, user, onLogout }: ApiDocsProps) => {
   const activeSectionData = sections.find((section) => section.id === activeSection)
 
   const codeExamples = {
-    curl: `curl -X POST 'https://api.{baseDomain}/v1/audit-contract' \\
+    curl: `curl -X POST 'https://api.${apiUrl}/v1/audit-contract' \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
