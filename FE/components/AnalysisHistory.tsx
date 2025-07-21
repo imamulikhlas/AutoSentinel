@@ -24,18 +24,23 @@ export const AnalysisHistory = ({
   loading,
   setActiveTab,
   showToast,
+  setAuditData, 
 }: AnalysisHistoryProps) => {
   const loadHistoricalReport = async (filePath: string) => {
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000"  // ← TAMBAH FALLBACK
       const res = await fetch(
         `${baseUrl}/load-audit-file?path=${encodeURIComponent(filePath)}&address=${address}&chain=${chain}`,
       )
+      
+      if (!res.ok) throw new Error("Failed to load historical report")  // ← TAMBAH ERROR HANDLING
+      
       const result: AuditData = await res.json()
-      // Note: setAuditData would need to be passed from parent or handled differently
+      setAuditData(result)  // ← TAMBAHKAN INI - PENTING!
       setActiveTab("results")
       showToast("success", "Historical report loaded successfully!")
     } catch (err) {
+      console.error("Load historical report error:", err)  // ← TAMBAH LOGGING
       showToast("error", "Failed to load analysis result")
     }
   }
@@ -49,15 +54,6 @@ export const AnalysisHistory = ({
         </div>
 
         <div className="relative z-10">
-          <div className="text-center mb-8 sm:mb-10">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-r from-blue-500/20 to-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 border-blue-500/30 hover:scale-110 transition-transform duration-300 group">
-              <History className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-blue-400 group-hover:animate-pulse" />
-            </div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4">Analysis History</h2>
-            <p className="text-gray-300 text-base sm:text-lg px-4">
-              Past security analysis reports for this contract address
-            </p>
-          </div>
 
           {histLoad && (
             <div className="text-center py-16 sm:py-20">
