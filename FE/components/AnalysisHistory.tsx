@@ -91,7 +91,7 @@ export const AnalysisHistory = ({
                 Start analyzing smart contracts to build your security history
               </p>
               <button
-                onClick={() => setActiveTab("check")}
+                onClick={() => setActiveTab("scanner")}
                 className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 sm:px-10 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg transition-all transform hover:scale-105 border-blue-400/30"
               >
                 Start First Analysis
