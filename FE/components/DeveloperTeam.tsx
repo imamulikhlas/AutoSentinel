@@ -13,7 +13,7 @@ export const DeveloperTeam = () => {
             name: "M Imamul Ikhlas",
             role: "Full Stack Developer",
             speciality: "Next Js, Python, Blockchain",
-            avatar: "/teams/imam.jpg?height=120&width=120",
+            avatar: "/teams/imam.webp?height=120&width=120",
             bio: "Passionate about building scalable web applications with modern technologies. Love turning ideas into reality.",
             skills: ["React", "TypeScript", "Python", "Supabase"],
             social: {
@@ -24,6 +24,7 @@ export const DeveloperTeam = () => {
             gradient: "from-blue-400 to-cyan-500",
             bgGradient: "from-blue-500/10 to-cyan-500/10",
             borderColor: "border-blue-500/30",
+            teamRole : "🎖️🧑‍🚀 Commander",
         },
         // {
         //   name: "Sarah Chen",
@@ -60,7 +61,7 @@ export const DeveloperTeam = () => {
           name: "Sela Amelia",
           role: "UI/UX Designer",
           speciality: "Product Design & Research",
-          avatar: "/placeholder.svg?height=120&width=120",
+          avatar: "/teams/sela.webp?height=10&width=99990",
           bio: "Creative designer focused on user experience and interface design. Making complex security tools accessible to everyone.",
           skills: ["Figma", "User Research", "Prototyping", "Design Systems"],
           social: {
@@ -69,6 +70,7 @@ export const DeveloperTeam = () => {
           gradient: "from-orange-400 to-red-500",
           bgGradient: "from-orange-500/10 to-red-500/10",
           borderColor: "border-orange-500/30",
+          teamRole : "🧑‍🚀Astro-S",
         },
     ]
 
@@ -138,7 +140,7 @@ export const DeveloperTeam = () => {
                                     <div
                                         className={`bg-gradient-to-r ${dev.gradient} text-white text-xs px-3 py-1 rounded-full font-bold shadow-lg animate-bounce`}
                                     >
-                                        TEAM
+                                        {dev.teamRole}
                                     </div>
                                 </div>
 
@@ -265,7 +267,7 @@ export const DeveloperTeam = () => {
                                     <span className="font-medium">Team Anjay Mabar</span>
                                 </div>
                                 <div className="hidden sm:block w-2 h-2 bg-gray-600 rounded-full"></div>
-                                <div className="text-gray-400">BI - OJK Hackathon 2025 Champions</div>
+                                <div className="text-gray-400">BI - OJK Hackathon 2025</div>
                             </div>
                         </InteractiveCard>
                     </div>
