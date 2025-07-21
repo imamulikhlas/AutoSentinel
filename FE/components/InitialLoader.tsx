@@ -26,7 +26,7 @@ export const InitialLoader = ({ onLoadingComplete }: InitialLoaderProps) => {
           }, 500)
           return 100
         }
-        
+
         // Calculate increment based on remaining progress
         // This ensures smooth progression and never exceeds 100%
         const remaining = 100 - prev
@@ -34,7 +34,7 @@ export const InitialLoader = ({ onLoadingComplete }: InitialLoaderProps) => {
           Math.random() * 8 + 2, // Random increment between 2-10
           remaining // Never exceed what's remaining
         )
-        
+
         const newProgress = prev + increment
         return Math.min(newProgress, 100) // Extra safety to ensure never > 100
       })
@@ -73,30 +73,25 @@ export const InitialLoader = ({ onLoadingComplete }: InitialLoaderProps) => {
 
       {/* Loading Content */}
       <div className="relative z-10 text-center">
-        {/* Logo Container */}
-        <div className="relative mb-8">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl blur-2xl opacity-50 animate-pulse"></div>
-          <div className="relative bg-gradient-to-r from-blue-500 to-purple-600 p-8 rounded-3xl shadow-2xl border-blue-400/30 hover:scale-105 transition-transform duration-300 group">
-            <ShieldIcon className="w-16 h-16 text-white group-hover:rotate-12 transition-transform" />
-          </div>
-        </div>
 
+        <h1 className="text-4xl sm:text-5xl font-bold mb-4 leading-tight font-orbitron">
+          <span className="animate-wave inline-block ml-2">✌️</span>
+        </h1>
         {/* App Name with Futuristic Font */}
         <h1 className="text-4xl sm:text-5xl font-bold mb-4 leading-tight font-orbitron">
           <span className="bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent">
             AUTO SENTINEL
           </span>
-          <span className="animate-wave inline-block ml-2">✌️</span>
         </h1>
 
         {/* Hackathon Badge */}
         <div className="inline-flex items-center bg-gray-800/50 backdrop-blur-xl border-gray-700/50 rounded-full px-6 py-3 mb-8 shadow-xl font-space-grotesk">
-          <img
+               <img
             src="https://hackathon.fekdi.co.id/img/hero/bi-hackathon-2025.webp"
             alt="BI - OJK Hackathon 2025"
             className="h-5 w-auto mr-3 animate-pulse"
           />
-          <span className="text-gray-300 font-medium text-sm">BI - OJK HACKATHON 2025</span>
+          <span className="text-gray-300 font-medium text-sm">By Anjay Mabar Team</span>
         </div>
 
         {/* Loading Progress */}

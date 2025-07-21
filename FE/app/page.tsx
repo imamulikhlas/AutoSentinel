@@ -1,5 +1,4 @@
 "use client"
-
 import { useState } from "react"
 import { LandingPage } from "@/components/LandingPage"
 import { Dashboard } from "@/components/Dashboard"
@@ -14,7 +13,7 @@ export default function Home() {
   const [showLogin, setShowLogin] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const { user, login, logout } = useAuth()
-
+  
   // Initialize Lenis smooth scrolling
   useLenis()
 
@@ -34,26 +33,44 @@ export default function Home() {
 
   const handleLogout = () => {
     logout()
-    setCurrentPage("landing") // Redirect to landing page after logout
+    setCurrentPage("landing")
   }
 
   const handleLoadingComplete = () => {
     setIsLoading(false)
   }
 
-  if (isLoading) {
-    return <InitialLoader onLoadingComplete={handleLoadingComplete} />
-  }
-
+  // Always render background to prevent white flash
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-slate-900">
-      {currentPage === "landing" && <LandingPage onNavigate={handleNavigation} user={user} onLogout={handleLogout} />}
-      {currentPage === "dashboard" && user && (
-        <Dashboard onNavigate={handleNavigation} user={user} onLogout={handleLogout} />
+    <div className="min-h-screen bg-slate-900">
+      {/* Fixed background to prevent white flash */}
+      <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-900 -z-10" />
+      
+      {isLoading ? (
+        <InitialLoader onLoadingComplete={handleLoadingComplete} />
+      ) : (
+        <>          
+          {/* Main content - NO transitions for now */}
+          <div className="relative z-10">
+            {currentPage === "landing" && (
+              <LandingPage onNavigate={handleNavigation} user={user} onLogout={handleLogout} />
+            )}
+            {currentPage === "dashboard" && user && (
+              <Dashboard onNavigate={handleNavigation} user={user} onLogout={handleLogout} />
+            )}
+            {currentPage === "docs" && (
+              <ApiDocs onNavigate={handleNavigation} user={user} onLogout={handleLogout} />
+            )}
+          </div>
+        </>
       )}
-      {currentPage === "docs" && <ApiDocs onNavigate={handleNavigation} user={user} onLogout={handleLogout} />}
 
-      <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} onLogin={handleLogin} />
+      {/* Login Modal */}
+      <LoginModal 
+        isOpen={showLogin} 
+        onClose={() => setShowLogin(false)} 
+        onLogin={handleLogin} 
+      />
     </div>
   )
 }

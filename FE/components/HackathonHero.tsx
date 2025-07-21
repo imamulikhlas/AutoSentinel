@@ -16,7 +16,7 @@ export const HackathonHero = () => {
   return (
     <div className="relative mb-12 overflow-hidden">
       {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 via-red-500/10 to-pink-500/10 animate-gradient-shift"></div>
+      <div className="absolute inset-0 bg-gradient-to-r"></div>
 
       {/* Floating Elements */}
       <div className="absolute inset-0 overflow-hidden">
@@ -44,7 +44,6 @@ export const HackathonHero = () => {
               alt="BI - OJK Hackathon 2025"
               className="h-8 w-auto group-hover:animate-pulse"
             />
-            {/* Animated Ring */}
             <div className="absolute inset-0 -m-2 border-2 border-orange-400/30 rounded-full animate-ping"></div>
           </div>
           <div className="text-left font-space-grotesk">
@@ -80,15 +79,11 @@ export const HackathonHero = () => {
         </h1>
 
         <p className="text-xl sm:text-2xl text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed font-space-grotesk">
-          <span className="bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent font-semibold">
-            🚀 BUILT IN 72 HOURS FOR BI-OJK HACKATHON 2025
-          </span>
-          <br />
           Revolutionary AI technology that stops web3 threats before they cause damage
         </p>
 
         {/* Achievement Badges */}
-        <div className="flex flex-wrap justify-center gap-4 mb-8">
+        {/* <div className="flex flex-wrap justify-center gap-4 mb-8">
           {[
             { icon: "🏆", text: "HACKATHON WINNER", color: "from-yellow-400 to-orange-500" },
             { icon: "🤖", text: "AI INNOVATION", color: "from-purple-400 to-pink-500" },
@@ -103,10 +98,10 @@ export const HackathonHero = () => {
               {text}
             </div>
           ))}
-        </div>
+        </div> */}
 
         {/* Hackathon Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
+        {/* <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
           {[
             { value: "72", label: "HOURS BUILT", icon: "⏱️" },
             { value: "100+", label: "TEAMS COMPETED", icon: "👥" },
@@ -126,7 +121,8 @@ export const HackathonHero = () => {
               </div>
             </div>
           ))}
-        </div>
+        </div> */}
+        
       </div>
     </div>
   )

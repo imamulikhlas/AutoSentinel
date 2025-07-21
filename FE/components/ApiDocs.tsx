@@ -16,6 +16,7 @@ export const ApiDocs = ({ onNavigate, user, onLogout }: ApiDocsProps) => {
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const apiUrl = process.env.NEXT_PUBLIC_DOMAIN_BASE || "autosentinel.web.id"
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -52,14 +53,14 @@ export const ApiDocs = ({ onNavigate, user, onLogout }: ApiDocsProps) => {
   const activeSectionData = sections.find((section) => section.id === activeSection)
 
   const codeExamples = {
-    curl: `curl -X POST "https://api.autosentinel.com/v1/audit-contract" \\
+    curl: `curl -X POST 'https://api.{baseDomain}/v1/audit-contract' \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
     "address": "0x1234567890123456789012345678901234567890",
     "chain": "ethereum"
   }'`,
-    javascript: `const response = await fetch('https://api.autosentinel.com/v1/audit-contract', {
+    javascript: `const response = await fetch('https://api.${apiUrl}/v1/audit-contract', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',
@@ -75,7 +76,7 @@ const auditResult = await response.json();
 console.log(auditResult);`,
     python: `import requests
 
-url = "https://api.autosentinel.com/v1/audit-contract"
+url = "https://api.${apiUrl}/v1/audit-contract"
 headers = {
     "Authorization": "Bearer YOUR_API_KEY",
     "Content-Type": "application/json"
@@ -92,7 +93,7 @@ print(audit_result)`,
 
 const auditContract = async (address, chain) => {
   try {
-    const response = await axios.post('https://api.autosentinel.com/v1/audit-contract', {
+    const response = await axios.post('https://api.${apiUrl}/v1/audit-contract', {
       address,
       chain
     }, {
@@ -265,7 +266,7 @@ auditContract('0x1234567890123456789012345678901234567890', 'ethereum')
                     <h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Base URL</h2>
                     <div className="bg-gray-900/50 rounded-xl p-4 border-gray-700/50 overflow-x-auto">
                       <code className="text-blue-300 font-mono text-sm sm:text-base">
-                        https://api.autosentinel.com/v1
+                        https://api.${apiUrl}/v1
                       </code>
                     </div>
                   </div>
@@ -505,14 +506,14 @@ auditContract('0x1234567890123456789012345678901234567890', 'ethereum')
                       {[
                         {
                           name: "JavaScript/TypeScript",
-                          status: "Available",
-                          color: "green",
+                          status: "Coming Soon",
+                          color: "amber",
                           description: "NPM package for Node.js and browser",
                         },
                         {
                           name: "Python",
-                          status: "Available",
-                          color: "green",
+                          status: "Coming Soon",
+                          color: "amber",
                           description: "PyPI package for Python applications",
                         },
                         {

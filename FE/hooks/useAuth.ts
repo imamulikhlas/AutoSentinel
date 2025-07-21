@@ -18,22 +18,33 @@ interface User {
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check for existing session
-    const savedUser = localStorage.getItem("auto-sentinel-user")
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser))
-      } catch (error) {
-        // Clear invalid data
-        localStorage.removeItem("auto-sentinel-user")
+    // Check for existing session with smooth loading
+    const checkSession = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 500)) // Simulate loading
+
+      const savedUser = localStorage.getItem("auto-sentinel-user")
+      if (savedUser) {
+        try {
+          setUser(JSON.parse(savedUser))
+        } catch (error) {
+          localStorage.removeItem("auto-sentinel-user")
+        }
       }
+      setIsLoading(false)
     }
+
+    checkSession()
   }, [])
 
-  const login = (credentials: { email: string; password: string }) => {
-    // Dummy login - in real app, this would call an API
+  const login = async (credentials: { email: string; password: string }) => {
+    setIsLoading(true)
+
+    // Simulate API call with smooth loading
+    await new Promise((resolve) => setTimeout(resolve, 800))
+
     const dummyUser: User = {
       id: "user_" + Math.random().toString(36).substr(2, 9),
       email: credentials.email,
@@ -50,16 +61,22 @@ export const useAuth = () => {
 
     setUser(dummyUser)
     localStorage.setItem("auto-sentinel-user", JSON.stringify(dummyUser))
+    setIsLoading(false)
   }
 
-  const logout = () => {
+  const logout = async () => {
+    setIsLoading(true)
+
+    // Smooth logout animation
+    await new Promise((resolve) => setTimeout(resolve, 300))
+
     setUser(null)
     localStorage.removeItem("auto-sentinel-user")
-
-    // Clear any other session data if needed
     sessionStorage.clear()
 
-    // Optional: Show logout success message
+    setIsLoading(false)
+
+    // Show logout success message
     const event = new CustomEvent("show-toast", {
       detail: {
         type: "success",
@@ -80,5 +97,5 @@ export const useAuth = () => {
     }
   }
 
-  return { user, login, logout, regenerateApiKey }
+  return { user, login, logout, regenerateApiKey, isLoading }
 }
