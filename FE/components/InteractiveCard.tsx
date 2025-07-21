@@ -9,7 +9,7 @@ interface InteractiveCardProps {
   onClick?: () => void
 }
 
-export const InteractiveCard = ({ children, className = "", hoverScale = true, onClick }: InteractiveCardProps) => {
+export const InteractiveCard = ({ children, className = "", hoverScale = true, onClick, ...rest }: InteractiveCardProps) => {
   const Component = onClick ? "button" : "div"
 
   return (
@@ -22,6 +22,7 @@ export const InteractiveCard = ({ children, className = "", hoverScale = true, o
         hover:shadow-xl
         ${className}
       `}
+      {...rest}
     >
       {children}
     </Component>

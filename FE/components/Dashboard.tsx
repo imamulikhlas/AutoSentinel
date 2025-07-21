@@ -51,6 +51,7 @@ export const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   const { toastMessage, showToast } = useToast()
   const {
     auditData,
+    setAuditData,
     error,
     loading,
     address,
@@ -92,21 +93,11 @@ export const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
     setHistLoad(true)
     setHistError(null)
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      const mockHistory: HistoryItem[] = [
-        {
-          timestamp: "20250120_143022",
-          total_issues: 3,
-          file_path: "/reports/audit_20250120_143022.json",
-        },
-        {
-          timestamp: "20250119_091545",
-          total_issues: 0,
-          file_path: "/reports/audit_20250119_091545.json",
-        },
-      ]
-      setHistory(mockHistory)
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000"
+      const res = await fetch(`${baseUrl}/audit-history/${addr}`)
+      if (!res.ok) throw new Error("Failed to fetch history")
+      const data = await res.json()
+      setHistory(data.history || [])
       showToast("success", "History loaded successfully!")
     } catch (e: any) {
       setHistError(e.message)
@@ -410,9 +401,7 @@ export const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
               loading={loading}
               setActiveTab={setActiveTab}
               showToast={showToast}
-              setAuditData={(data: AuditData) => {
-                // Handle audit data
-              }}
+              setAuditData={setAuditData} 
             />
           )}
 
