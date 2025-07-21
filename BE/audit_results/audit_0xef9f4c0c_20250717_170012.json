@@ -1,0 +1,197 @@
+{
+  "contract_address": "0xef9f4c0c3403d269c867c908e7f66748cc17f28a",
+  "chain": "ethereum",
+  "audit_timestamp": "2025-07-17T17:00:12.344307",
+  "risk_level": "Low",
+  "risk_score": 56,
+  "security_metrics": {
+    "total_issues": 14,
+    "critical_issues": 0,
+    "high_issues": 0,
+    "medium_issues": 0,
+    "low_issues": 2,
+    "informational_issues": 12,
+    "code_quality_score": 58,
+    "security_score": 90,
+    "trust_score": 56,
+    "contract_age_days": 3,
+    "transaction_count": 24,
+    "unique_users": 3
+  },
+  "vulnerabilities": [
+    {
+      "type": "assembly",
+      "severity": "Informational",
+      "description": "Address._revert(bytes,string) (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#461-485) uses assembly\n\t- INLINE ASM (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#471-477)\n",
+      "impact": "[Address._revert(bytes,string)](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L461-L485) uses assembly\n\t- [INLINE ASM](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L471-L477)\n",
+      "recommendation": "Avoid using inline assembly unless absolutely necessary. Use high-level Solidity constructs instead.",
+      "line_number": 461,
+      "function_name": "_revert"
+    },
+    {
+      "type": "pragma",
+      "severity": "Informational",
+      "description": "3 different versions of Solidity are used:\n\t- Version constraint ^0.8.1 is used by:\n\t\t-^0.8.1 (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#9)\n\t- Version constraint ^0.8.0 is used by:\n\t\t-^0.8.0 (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#501)\n\t\t-^0.8.0 (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#961)\n\t- Version constraint ^0.8.18 is used by:\n\t\t-^0.8.18 (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#1017)\n",
+      "impact": "3 different versions of Solidity are used:\n\t- Version constraint ^0.8.1 is used by:\n\t\t-[^0.8.1](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L9)\n\t- Version constraint ^0.8.0 is used by:\n\t\t-[^0.8.0](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L501)\n\t\t-[^0.8.0](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L961)\n\t- Version constraint ^0.8.18 is used by:\n\t\t-[^0.8.18](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L1017)\n",
+      "recommendation": "Use a fixed Solidity version to ensure consistent compilation across environments.",
+      "line_number": 9,
+      "function_name": null
+    },
+    {
+      "type": "dead-code",
+      "severity": "Informational",
+      "description": "Context._msgData() (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#995-999) is never used and should be removed\n",
+      "impact": "[Context._msgData()](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L995-L999) is never used and should be removed\n",
+      "recommendation": "Remove unused code to improve contract readability and reduce deployment costs.",
+      "line_number": 995,
+      "function_name": "_msgData"
+    },
+    {
+      "type": "solc-version",
+      "severity": "Informational",
+      "description": "Version constraint ^0.8.18 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- VerbatimInvalidDeduplication\n\t- FullInlinerNonExpressionSplitArgumentEvaluationOrder\n\t- MissingSideEffectsOnSelectorAccess.\nIt is used by:\n\t- ^0.8.18 (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#1017)\n",
+      "impact": "Version constraint ^0.8.18 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- VerbatimInvalidDeduplication\n\t- FullInlinerNonExpressionSplitArgumentEvaluationOrder\n\t- MissingSideEffectsOnSelectorAccess.\nIt is used by:\n\t- [^0.8.18](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L1017)\n",
+      "recommendation": "Update to a more recent Solidity version that fixes known bugs.",
+      "line_number": 1017,
+      "function_name": null
+    },
+    {
+      "type": "solc-version",
+      "severity": "Informational",
+      "description": "Version constraint ^0.8.0 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- FullInlinerNonExpressionSplitArgumentEvaluationOrder\n\t- MissingSideEffectsOnSelectorAccess\n\t- AbiReencodingHeadOverflowWithStaticArrayCleanup\n\t- DirtyBytesArrayToStorage\n\t- DataLocationChangeInInternalOverride\n\t- NestedCalldataArrayAbiReencodingSizeValidation\n\t- SignedImmutables\n\t- ABIDecodeTwoDimensionalArrayMemory\n\t- KeccakCaching.\nIt is used by:\n\t- ^0.8.0 (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#501)\n\t- ^0.8.0 (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#961)\n",
+      "impact": "Version constraint ^0.8.0 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- FullInlinerNonExpressionSplitArgumentEvaluationOrder\n\t- MissingSideEffectsOnSelectorAccess\n\t- AbiReencodingHeadOverflowWithStaticArrayCleanup\n\t- DirtyBytesArrayToStorage\n\t- DataLocationChangeInInternalOverride\n\t- NestedCalldataArrayAbiReencodingSizeValidation\n\t- SignedImmutables\n\t- ABIDecodeTwoDimensionalArrayMemory\n\t- KeccakCaching.\nIt is used by:\n\t- [^0.8.0](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L501)\n\t- [^0.8.0](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L961)\n",
+      "recommendation": "Update to a more recent Solidity version that fixes known bugs.",
+      "line_number": 501,
+      "function_name": null
+    },
+    {
+      "type": "solc-version",
+      "severity": "Informational",
+      "description": "Version constraint ^0.8.1 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- FullInlinerNonExpressionSplitArgumentEvaluationOrder\n\t- MissingSideEffectsOnSelectorAccess\n\t- AbiReencodingHeadOverflowWithStaticArrayCleanup\n\t- DirtyBytesArrayToStorage\n\t- DataLocationChangeInInternalOverride\n\t- NestedCalldataArrayAbiReencodingSizeValidation\n\t- SignedImmutables\n\t- ABIDecodeTwoDimensionalArrayMemory\n\t- KeccakCaching.\nIt is used by:\n\t- ^0.8.1 (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#9)\n",
+      "impact": "Version constraint ^0.8.1 contains known severe issues (https://solidity.readthedocs.io/en/latest/bugs.html)\n\t- FullInlinerNonExpressionSplitArgumentEvaluationOrder\n\t- MissingSideEffectsOnSelectorAccess\n\t- AbiReencodingHeadOverflowWithStaticArrayCleanup\n\t- DirtyBytesArrayToStorage\n\t- DataLocationChangeInInternalOverride\n\t- NestedCalldataArrayAbiReencodingSizeValidation\n\t- SignedImmutables\n\t- ABIDecodeTwoDimensionalArrayMemory\n\t- KeccakCaching.\nIt is used by:\n\t- [^0.8.1](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L9)\n",
+      "recommendation": "Update to a more recent Solidity version that fixes known bugs.",
+      "line_number": 9,
+      "function_name": null
+    },
+    {
+      "type": "low-level-calls",
+      "severity": "Informational",
+      "description": "Low level call in Address.sendValue(address,uint256) (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#119-129):\n\t- (success,None) = recipient.call{value: amount}() (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#125)\n",
+      "impact": "Low level call in [Address.sendValue(address,uint256)](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L119-L129):\n\t- [(success,None) = recipient.call{value: amount}()](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L125)\n",
+      "recommendation": "Use high-level function calls instead of low-level calls when possible.",
+      "line_number": 119,
+      "function_name": "sendValue"
+    },
+    {
+      "type": "low-level-calls",
+      "severity": "Informational",
+      "description": "Low level call in Address.functionCallWithValue(address,bytes,uint256,string) (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#255-273):\n\t- (success,returndata) = target.call{value: value}(data) (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#269)\n",
+      "impact": "Low level call in [Address.functionCallWithValue(address,bytes,uint256,string)](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L255-L273):\n\t- [(success,returndata) = target.call{value: value}(data)](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L269)\n",
+      "recommendation": "Use high-level function calls instead of low-level calls when possible.",
+      "line_number": 255,
+      "function_name": "functionCallWithValue"
+    },
+    {
+      "type": "low-level-calls",
+      "severity": "Informational",
+      "description": "Low level call in Address.functionDelegateCall(address,bytes,string) (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#359-373):\n\t- (success,returndata) = target.delegatecall(data) (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#369)\n",
+      "impact": "Low level call in [Address.functionDelegateCall(address,bytes,string)](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L359-L373):\n\t- [(success,returndata) = target.delegatecall(data)](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L369)\n",
+      "recommendation": "Use high-level function calls instead of low-level calls when possible.",
+      "line_number": 359,
+      "function_name": "functionDelegateCall"
+    },
+    {
+      "type": "low-level-calls",
+      "severity": "Informational",
+      "description": "Low level call in Address.functionStaticCall(address,bytes,string) (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#309-323):\n\t- (success,returndata) = target.staticcall(data) (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#319)\n",
+      "impact": "Low level call in [Address.functionStaticCall(address,bytes,string)](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L309-L323):\n\t- [(success,returndata) = target.staticcall(data)](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L319)\n",
+      "recommendation": "Use high-level function calls instead of low-level calls when possible.",
+      "line_number": 309,
+      "function_name": "functionStaticCall"
+    },
+    {
+      "type": "naming-convention",
+      "severity": "Informational",
+      "description": "Contract alltimehigh (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#1063-1262) is not in CapWords\n",
+      "impact": "Contract [alltimehigh](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L1063-L1262) is not in CapWords\n",
+      "recommendation": "Follow Solidity naming conventions: CapWords for contracts, mixedCase for functions.",
+      "line_number": 1063,
+      "function_name": null
+    },
+    {
+      "type": "too-many-digits",
+      "severity": "Informational",
+      "description": "alltimehigh.constructor() (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#1087-1101) uses literals with too many digits:\n\t- initialSupply = 235000000 (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#1095)\n",
+      "impact": "[alltimehigh.constructor()](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L1087-L1101) uses literals with too many digits:\n\t- [initialSupply = 235000000](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L1095)\n",
+      "recommendation": "Use underscores to separate digits in large numbers for better readability.",
+      "line_number": 1087,
+      "function_name": "constructor"
+    },
+    {
+      "type": "immutable-states",
+      "severity": "Low",
+      "description": "alltimehigh._decimals (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#1079) should be immutable \n",
+      "impact": "[alltimehigh._decimals](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L1079) should be immutable \n",
+      "recommendation": "Use immutable keyword for variables that are set once in constructor.",
+      "line_number": 1079,
+      "function_name": null
+    },
+    {
+      "type": "immutable-states",
+      "severity": "Low",
+      "description": "alltimehigh.bathroom (temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#1085) should be immutable \n",
+      "impact": "[alltimehigh.bathroom](temp_contracts/alltimehigh_0xef9f4c0c_20250717_165952.sol#L1085) should be immutable \n",
+      "recommendation": "Use immutable keyword for variables that are set once in constructor.",
+      "line_number": 1085,
+      "function_name": null
+    }
+  ],
+  "ai_summary": "<div class=\"space-y-8 text-gray-200 text-base leading-relaxed\">\n\n  <section class=\"bg-gradient-to-r from-red-600/20 to-rose-600/20 rounded-xl p-6 border border-red-400/30\">\n    <div class=\"flex items-center mb-6\">\n      <span class=\"text-3xl mr-4\">🚨</span>\n      <h2 class=\"text-2xl font-bold text-red-300\">EXPERT SECURITY ALERT</h2>\n    </div>\n    \n    <div class=\"bg-red-500/20 rounded-lg p-5 border border-red-400/30 mb-6\">\n      <h3 class=\"text-red-300 font-bold text-xl mb-3\">⚠️ MODERATE RISK ASSESSMENT CONFIRMED</h3>\n      <p class=\"text-gray-300 leading-relaxed text-lg\">\n        Based on my analysis of 14 security issues including 0 high-severity vulnerabilities, this contract presents a MODERATE risk to users. The trust score of 56/100 confirms this assessment.\n      </p>\n    </div>\n    \n    <div class=\"grid grid-cols-1 md:grid-cols-2 gap-4\">\n      <div class=\"bg-black/40 rounded-lg p-4 border border-red-400/20\">\n        <h4 class=\"text-red-300 font-bold mb-2\">🎯 Critical Attack Vectors</h4>\n        <p class=\"text-gray-300 text-sm\">\n          No high-severity vulnerabilities were found, including no reentrancy and arbitrary-send-eth issues.\n        </p>\n      </div>\n      \n      <div class=\"bg-black/40 rounded-lg p-4 border border-red-400/20\">\n        <h4 class=\"text-red-300 font-bold mb-2\">⏰ Maturity Risk</h4>\n        <p class=\"text-gray-300 text-sm\">\n          Contract age of 3 days indicates an experimental/unproven risk factor.\n        </p>\n      </div>\n    </div>\n  </section>\n\n  <section class=\"bg-gradient-to-r from-amber-600/20 to-orange-600/20 rounded-xl p-6 border border-amber-400/30\">\n    <div class=\"flex items-center mb-6\">\n      <span class=\"text-3xl mr-4\">🔬</span>\n      <h2 class=\"text-2xl font-bold text-amber-300\">Technical Vulnerability Analysis</h2>\n    </div>\n    \n    <div class=\"space-y-4\">\n      <div class=\"bg-black/40 rounded-lg p-5 border border-amber-400/20\">\n        <h3 class=\"text-amber-300 font-bold text-lg mb-3\">⚔️ Exploitation Potential</h3>\n        <p class=\"text-gray-300 leading-relaxed\">\n          Although no high-severity vulnerabilities were found, the presence of 14 total vulnerabilities, including informational issues related to assembly, pragma, dead-code, and solc-version, may still pose a risk. However, these issues do not appear to be directly exploitable for significant financial gain.\n        </p>\n      </div>\n    </div>\n  </section>\n\n  <section class=\"bg-gradient-to-r from-purple-600/20 to-indigo-600/20 rounded-xl p-6 border border-purple-400/30\">\n    <div class=\"flex items-center mb-6\">\n      <span class=\"text-3xl mr-4\">🏭</span>\n      <h2 class=\"text-2xl font-bold text-purple-300\">Professional Risk Rating</h2>\n    </div>\n    \n    <div class=\"bg-black/40 rounded-lg p-5 border border-purple-400/20\">\n      <h3 class=\"text-purple-300 font-bold text-lg mb-3\">📊 Expert Verdict</h3>\n        <p class=\"text-gray-300 leading-relaxed\">\n          Given the moderate risk assessment and the contract's young age, I recommend caution and close monitoring. Specifically, it is advised to:\n          <ul>\n            <li>Address the informational issues to improve the contract's security posture.</li>\n            <li>Monitor the contract's activity closely for any suspicious transactions.</li>\n            <li>Consider conducting a thorough security audit to identify potential vulnerabilities that may not have been detected.</li>\n          </ul>\n        </p>\n    </div>\n  </section>\n\n  <section class=\"bg-gradient-to-r from-gray-700/20 to-gray-800/20 rounded-xl p-6 border border-gray-600/30\">\n    <div class=\"flex items-center mb-6\">\n      <span class=\"text-3xl mr-4\">📋</span>\n      <h2 class=\"text-2xl font-bold text-white\">Expert Final Rating</h2>\n    </div>\n    \n    <div class=\"bg-black/50 rounded-lg p-6 border border-gray-600/30 text-center\">\n      <div class=\"text-6xl font-bold text-orange-400 mb-4\">C+</div>\n      <p class=\"text-gray-400 text-xl mb-4\">Professional Security Grade</p>\n      <div class=\"bg-orange-500/20 rounded-lg p-4 border border-orange-400/30\">\n        <p class=\"text-xl text-orange-300 font-bold\">\n          RECOMMENDATION: MODERATE RISK - MONITOR CLOSELY\n        </p>\n      </div>\n    </div>\n  </section>\n\n</div>\n\n\nThe contract's trust score of 56/100 and the absence of high-severity vulnerabilities indicate a moderate risk level. However, the contract's young age (3 days) adds an experimental/unproven risk factor. While no critical vulnerabilities were found, the presence of informational issues and a relatively low trust score suggest that caution and close monitoring are warranted. The recommendations provided aim to mitigate potential risks and improve the contract's security posture.",
+  "recommendations": [
+    "📋 Lakukan code review menyeluruh dengan tim development",
+    "🔍 Pertimbangkan audit profesional untuk kontrak yang akan di-deploy",
+    "📚 Implementasikan automated testing untuk mencegah regresi"
+  ],
+  "gas_optimization_hints": [
+    "💡 Gunakan `uint256` instead of `uint8` untuk gas efficiency",
+    "🔄 Implementasikan batch operations untuk mengurangi gas cost",
+    "📦 Pertimbangkan storage packing untuk struct variables",
+    "⚡ Gunakan `external` visibility untuk functions yang hanya dipanggil dari luar",
+    "🗜️ Implementasikan lazy loading untuk data yang jarang diakses"
+  ],
+  "audit_file_path": "",
+  "contract_info": {
+    "is_verified": true,
+    "verification_date": null,
+    "compiler_version": "v0.8.26+commit.8a97fa7a",
+    "contract_name": "alltimehigh",
+    "proxy_type": null,
+    "implementation_address": null
+  },
+  "ownership_analysis": {
+    "owner_address": null,
+    "is_multisig": false,
+    "ownership_renounced": false,
+    "admin_functions": [
+      "courtship"
+    ],
+    "centralization_risk": "Low"
+  },
+  "trading_analysis": {
+    "is_honeypot": false,
+    "honeypot_confidence": 0.0,
+    "buy_tax": 0.0,
+    "sell_tax": 0.0,
+    "liquidity_locked": false,
+    "trading_enabled": true,
+    "max_transaction_limit": null
+  },
+  "social_presence": {
+    "website": null,
+    "twitter": "https://twitter.com/alltimehigh",
+    "telegram": "https://t.me/alltimehigh",
+    "github": "https://github.com/alltimehigh",
+    "discord": null,
+    "social_score": 65
+  }
+}
