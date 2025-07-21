@@ -15,6 +15,7 @@ downloads/
 eggs/
 .eggs/
 lib/
+audit_results/
 lib64/
 parts/
 sdist/
