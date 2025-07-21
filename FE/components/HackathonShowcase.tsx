@@ -38,7 +38,7 @@ export const HackathonShowcase = () => {
               Our Hackathon Innovation
             </h3>
             <p className="text-gray-300 text-lg max-w-3xl mx-auto">
-              Built in 72 hours, Auto Sentinel represents the future of blockchain security
+              Auto Sentinel represents the future of blockchain security
             </p>
           </div>
 
@@ -54,7 +54,7 @@ export const HackathonShowcase = () => {
               {
                 title: "Comprehensive API",
                 description: "Enterprise-grade REST API with extensive documentation and SDKs",
-                icon: "⚡",
+                icon: "🔥",
                 gradient: "from-blue-500/20 to-cyan-500/20",
                 border: "border-blue-500/30",
               },

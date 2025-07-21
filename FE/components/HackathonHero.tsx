@@ -50,7 +50,6 @@ export const HackathonHero = () => {
             <p className="text-orange-400 font-bold text-lg">BI - OJK HACKATHON 2025</p>
             <p className="text-orange-300 text-sm">🏆 INNOVATION IN FINTECH SECURITY</p>
           </div>
-          <TrophyIcon className="w-6 h-6 text-yellow-400 ml-4 animate-bounce" />
         </div>
 
         {/* Dynamic Title */}

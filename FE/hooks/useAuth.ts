@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useEffect } from "react"
 
 interface User {
@@ -20,11 +19,21 @@ export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    // Check for existing session with smooth loading
-    const checkSession = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 500)) // Simulate loading
+  // Function untuk generate API
+  const generateApiKey = () => {
+    // Menggunakan format AUTOSENTINEL dengan timestamp dan random segments
+    const version = 'V1';
+    const timestamp = Date.now().toString().slice(-8);
+    const randomAlpha = Math.random().toString(36).substr(2, 10).toUpperCase();
+    const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    const randomAlpha2 = Math.random().toString(36).substr(2, 8).toUpperCase();
+    
+    return `AUTOSENTINEL_${version}_${timestamp}_${randomAlpha}_${randomNum}_${randomAlpha2}`;
+  }
 
+  useEffect(() => {
+    const checkSession = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 500))
       const savedUser = localStorage.getItem("auto-sentinel-user")
       if (savedUser) {
         try {
@@ -35,22 +44,19 @@ export const useAuth = () => {
       }
       setIsLoading(false)
     }
-
     checkSession()
   }, [])
 
   const login = async (credentials: { email: string; password: string }) => {
     setIsLoading(true)
-
-    // Simulate API call with smooth loading
     await new Promise((resolve) => setTimeout(resolve, 800))
-
+    
     const dummyUser: User = {
       id: "user_" + Math.random().toString(36).substr(2, 9),
       email: credentials.email,
       name: credentials.email.split("@")[0],
       plan: "pro",
-      apiKey: "as_" + Math.random().toString(36).substr(2, 32),
+      apiKey: generateApiKey(), // Pakai function baru
       usage: {
         requests: Math.floor(Math.random() * 500),
         limit: 1000,
@@ -58,7 +64,7 @@ export const useAuth = () => {
       },
       joinDate: new Date().toISOString(),
     }
-
+    
     setUser(dummyUser)
     localStorage.setItem("auto-sentinel-user", JSON.stringify(dummyUser))
     setIsLoading(false)
@@ -66,17 +72,12 @@ export const useAuth = () => {
 
   const logout = async () => {
     setIsLoading(true)
-
-    // Smooth logout animation
     await new Promise((resolve) => setTimeout(resolve, 300))
-
     setUser(null)
     localStorage.removeItem("auto-sentinel-user")
     sessionStorage.clear()
-
     setIsLoading(false)
-
-    // Show logout success message
+    
     const event = new CustomEvent("show-toast", {
       detail: {
         type: "success",
@@ -90,10 +91,19 @@ export const useAuth = () => {
     if (user) {
       const updatedUser = {
         ...user,
-        apiKey: "as_" + Math.random().toString(36).substr(2, 32),
+        apiKey: generateApiKey(), // Pakai function baru juga
       }
       setUser(updatedUser)
       localStorage.setItem("auto-sentinel-user", JSON.stringify(updatedUser))
+      
+      // Opsional: Kasih notifikasi kalau API key berhasil di-regenerate
+      const event = new CustomEvent("show-toast", {
+        detail: {
+          type: "success",
+          message: "API key successfully regenerated",
+        },
+      })
+      window.dispatchEvent(event)
     }
   }
 

@@ -53,7 +53,7 @@ export const ApiDocs = ({ onNavigate, user, onLogout }: ApiDocsProps) => {
   const activeSectionData = sections.find((section) => section.id === activeSection)
 
   const codeExamples = {
-    curl: `curl -X POST 'https://api.{baseDomain}/v1/audit-contract' \\
+    curl: `curl -X POST 'https://api.${apiUrl}/v1/audit-contract' \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -266,7 +266,7 @@ auditContract('0x1234567890123456789012345678901234567890', 'ethereum')
                     <h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Base URL</h2>
                     <div className="bg-gray-900/50 rounded-xl p-4 border-gray-700/50 overflow-x-auto">
                       <code className="text-blue-300 font-mono text-sm sm:text-base">
-                        https://api.${apiUrl}/v1
+                        https://api.{apiUrl}/v1
                       </code>
                     </div>
                   </div>

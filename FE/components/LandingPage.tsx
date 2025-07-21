@@ -7,6 +7,8 @@ import { BackgroundElements } from "./BackgroundElements"
 import { HackathonHero } from "./HackathonHero"
 import { HackathonShowcase } from "./HackathonShowcase"
 import { FloatingHackathonBadge } from "./FloatingHackathonBadge"
+import { DeveloperTeam } from "./DeveloperTeam"
+
 import { SmoothTransition } from "./SmoothTransition"
 import { InteractiveCard } from "./InteractiveCard"
 import { SmoothButton } from "./SmoothButton"
@@ -186,6 +188,8 @@ export const LandingPage = ({ onNavigate, user, onLogout }: LandingPageProps) =>
           </SmoothTransition>
         </div>
       </section>
+
+      <DeveloperTeam />
 
       {/* CTA Section */}
       <section className="relative z-10 py-20 px-4 sm:px-6 lg:px-8">
