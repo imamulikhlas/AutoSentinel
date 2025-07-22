@@ -32,7 +32,7 @@ export const Navigation = ({ onNavigate, user, onLogout }: NavigationProps) => {
             className="flex items-center cursor-pointer"
             onClick={() => handleNavigation('landing')}
           >
-            <div className="bg-white/50 backdrop-blur-md p-1 rounded-lg border border-white/10 shadow-inner mr-3">
+            <div className="bg-white/50 backdrop-blur-md p-2 rounded-lg border border-white/10 shadow-inner mr-3">
               <img
                 src="/assets/logo3.png"
                 alt="Auto Sentinel Logo"
