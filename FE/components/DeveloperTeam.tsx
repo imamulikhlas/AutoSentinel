@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Github, Linkedin, Twitter, Mail, Code, Coffee, Zap, Heart } from "lucide-react"
+import { Github, Linkedin, Twitter, Mail, Code, Coffee, Zap, Heart, Star, Server } from "lucide-react"
 import { SmoothTransition } from "./SmoothTransition"
 import { InteractiveCard } from "./InteractiveCard"
 
@@ -264,9 +264,9 @@ export const DeveloperTeam = () => {
                     <div className="mt-16 text-center">
                         <InteractiveCard className="bg-gradient-to-r from-orange-500/10 via-red-500/10 to-pink-500/10 rounded-3xl p-8 sm:p-12 border border-orange-500/20 backdrop-blur-xl max-w-4xl mx-auto">
                             <div className="flex items-center justify-center mb-6">
-                                <Heart className="w-8 h-8 text-red-400 mr-3 animate-pulse" />
+                                <Star className="w-8 h-8 text-orange-400 mr-3 animate-pulse" />
                                 <h3 className="text-2xl sm:text-3xl font-bold text-white">Built with Passion</h3>
-                                <Heart className="w-8 h-8 text-red-400 ml-3 animate-pulse" />
+                                <Star className="w-8 h-8 text-orange-400 ml-3 animate-pulse" />
                             </div>
                             <p className="text-lg text-gray-300 leading-relaxed mb-6 transition-colors duration-300 hover:text-gray-200">
                                 "We believe that blockchain security shouldn't be complicated. That's why we built Auto Sentinel - to
@@ -274,7 +274,7 @@ export const DeveloperTeam = () => {
                             </p>
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                                 <div className="flex items-center text-orange-400">
-                                    <Zap className="w-5 h-5 mr-2 animate-pulse" />
+                                    <Server className="w-5 h-5 mr-2 animate-pulse" />
                                     <span className="font-medium">Team Anjay Mabar</span>
                                 </div>
                                 <div className="hidden sm:block w-2 h-2 bg-gray-600 rounded-full"></div>
