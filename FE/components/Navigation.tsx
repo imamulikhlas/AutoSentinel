@@ -28,9 +28,16 @@ export const Navigation = ({ onNavigate, user, onLogout }: NavigationProps) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center cursor-pointer" onClick={() => handleNavigation("landing")}>
-            <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg border-blue-400/30 mr-3">
-              <ShieldIcon className="w-6 h-6 text-white" />
+          <div
+            className="flex items-center cursor-pointer"
+            onClick={() => handleNavigation('landing')}
+          >
+            <div className="bg-white/50 backdrop-blur-md p-1 rounded-lg border border-white/10 shadow-inner mr-3">
+              <img
+                src="/assets/logo3.png"
+                alt="Auto Sentinel Logo"
+                className="w-10 h-10 object-contain"
+              />
             </div>
             <span className="text-white font-bold text-xl font-orbitron">AUTO SENTINEL</span>
           </div>
