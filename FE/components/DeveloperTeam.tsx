@@ -10,6 +10,22 @@ export const DeveloperTeam = () => {
 
     const developers = [
         {
+          name: "Farel Imam Maulana",
+          role: "AI/ML Engineer",
+          speciality: "Machine Learning & Security",
+          avatar: "/placeholder.svg?height=120&width=120",
+          bio: "AI enthusiast specializing in security analysis and threat detection algorithms. Building the future of smart contract security.",
+          skills: ["Python", "TensorFlow", "Security Analysis", "Blockchain"],
+          social: {
+            github: "https://github.com/sarahchen",
+            linkedin: "https://linkedin.com/in/farel-imam-maulana-5a2622355",
+          },
+          gradient: "from-green-400 to-emerald-500",
+          bgGradient: "from-green-500/10 to-emerald-500/10",
+          borderColor: "border-green-500/30",
+          teamRole : "🧑‍🚀Astro-F",
+        },
+                {
             name: "M Imamul Ikhlas",
             role: "Full Stack Developer",
             speciality: "Next Js, Python, Blockchain",
@@ -27,23 +43,6 @@ export const DeveloperTeam = () => {
             teamRole : "🎖️🧑‍🚀 Commander",
         },
         // {
-        //   name: "Sarah Chen",
-        //   role: "AI/ML Engineer",
-        //   speciality: "Machine Learning & Security",
-        //   avatar: "/placeholder.svg?height=120&width=120",
-        //   bio: "AI enthusiast specializing in security analysis and threat detection algorithms. Building the future of smart contract security.",
-        //   skills: ["Python", "TensorFlow", "Security Analysis", "Blockchain"],
-        //   social: {
-        //     github: "https://github.com/sarahchen",
-        //     linkedin: "https://linkedin.com/in/sarahchen",
-        //     twitter: "https://twitter.com/sarahchen",
-        //     email: "sarah@anjaymabar.dev",
-        //   },
-        //   gradient: "from-purple-400 to-pink-500",
-        //   bgGradient: "from-purple-500/10 to-pink-500/10",
-        //   borderColor: "border-purple-500/30",
-        // },
-        // {
         //     name: "Sela Amelia",
         //     role: "Blockchain Developer",
         //     speciality: "Smart Contract Security",
@@ -53,9 +52,9 @@ export const DeveloperTeam = () => {
         //     social: {
         //         linkedin: "https://linkedin.com/in/davidkim",
         //     },
-        //     gradient: "from-green-400 to-emerald-500",
-        //     bgGradient: "from-green-500/10 to-emerald-500/10",
-        //     borderColor: "border-green-500/30",
+                // gradient: "from-purple-400 to-pink-500",
+                // bgGradient: "from-purple-500/10 to-pink-500/10",
+                // borderColor: "border-purple-500/30",
         // },
         {
           name: "Sela Amelia",
@@ -73,6 +72,130 @@ export const DeveloperTeam = () => {
           teamRole : "🧑‍🚀Astro-S",
         },
     ]
+
+    const renderCard = (dev, i) => (
+        <SmoothTransition key={i} delay={400 + i * 100}>
+            <InteractiveCard
+                className={`bg-gray-800/50 backdrop-blur-xl rounded-2xl p-6 border ${dev.borderColor} shadow-xl relative overflow-hidden transition-all duration-300 hover:shadow-2xl`}
+                onMouseOver={() => setHoveredDev(i)}
+                onMouseLeave={() => setHoveredDev(null)}
+            >
+                {/* Background Gradient */}
+                <div
+                    className={`absolute inset-0 bg-gradient-to-r ${dev.bgGradient} opacity-0 hover:opacity-100 transition-opacity duration-400`}
+                ></div>
+
+                {/* Floating Badge */}
+                <div className="absolute top-3 -right-2 z-20">
+                    <div
+                        className={`bg-gradient-to-r ${dev.gradient} text-white text-xs px-3 py-1 rounded-full font-bold shadow-lg animate-bounce`}
+                    >
+                        {dev.teamRole}
+                    </div>
+                </div>
+
+                <div className="relative z-10">
+                    {/* Avatar */}
+                    <div className="text-center mb-6">
+                        <div className="relative inline-block">
+                            <div
+                                className={`absolute inset-0 bg-gradient-to-r ${dev.gradient} rounded-full blur-lg opacity-50 animate-pulse`}
+                            ></div>
+                            <img
+                                src={dev.avatar || "/placeholder.svg"}
+                                alt={dev.name}
+                                className={`relative w-20 h-20 rounded-full border-2 ${dev.borderColor} transition-all duration-300 hover:scale-110 hover:rotate-3`}
+                            />
+                            {/* Online Status */}
+                            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-gray-800 flex items-center justify-center">
+                                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Info */}
+                    <div className="text-center mb-4">
+                        <h3
+                            className={`text-xl font-bold text-white mb-1 transition-all duration-300 hover:bg-gradient-to-r hover:${dev.gradient} hover:bg-clip-text`}
+                        >
+                            {dev.name}
+                        </h3>
+                        <p
+                            className={`text-sm font-medium bg-gradient-to-r ${dev.gradient} bg-clip-text text-transparent mb-1`}
+                        >
+                            {dev.role}
+                        </p>
+                        <p className="text-xs text-gray-400 transition-colors duration-300 hover:text-gray-300">
+                            {dev.speciality}
+                        </p>
+                    </div>
+
+                    {/* Bio */}
+                    <div
+                        className={`transition-all duration-300 ${hoveredDev === i ? "max-h-32 opacity-100" : "max-h-0 opacity-0"} overflow-hidden`}
+                    >
+                        <p className="text-gray-300 text-sm leading-relaxed mb-4 transition-colors duration-300 hover:text-gray-200">
+                            {dev.bio}
+                        </p>
+                    </div>
+
+                    {/* Skills */}
+                    <div className="mb-4">
+                        <div className="flex flex-wrap gap-1">
+                            {dev.skills.slice(0, hoveredDev === i ? 4 : 2).map((skill, skillIndex) => (
+                                <SmoothTransition key={skillIndex} delay={skillIndex * 50}>
+                                    <span
+                                        className={`text-xs px-2 py-1 bg-gradient-to-r ${dev.bgGradient} border ${dev.borderColor} rounded-full text-gray-300 transition-all duration-300 hover:scale-105`}
+                                    >
+                                        {skill}
+                                    </span>
+                                </SmoothTransition>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Social Links */}
+                    <div className="flex justify-center space-x-3">
+                        {[
+                            dev.social?.github && {
+                                icon: Github,
+                                url: dev.social.github,
+                                color: "hover:text-gray-300"
+                            },
+                            dev.social?.linkedin && {
+                                icon: Linkedin,
+                                url: dev.social.linkedin,
+                                color: "hover:text-blue-400"
+                            },
+                            dev.social?.twitter && {
+                                icon: Twitter,
+                                url: dev.social.twitter,
+                                color: "hover:text-cyan-400"
+                            },
+                            dev.social?.email && {
+                                icon: Mail,
+                                url: `mailto:${dev.social.email}`,
+                                color: "hover:text-red-400"
+                            },
+                        ]
+                            .filter(Boolean) 
+                            .map(({ icon: Icon, url, color }, socialIndex) => (
+                                <SmoothTransition key={socialIndex} delay={socialIndex * 50}>
+                                    <a
+                                        href={url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={`text-gray-500 ${color} transition-all duration-300 hover:scale-125 hover:-translate-y-1`}
+                                    >
+                                        <Icon className="w-4 h-4" />
+                                    </a>
+                                </SmoothTransition>
+                            ))}
+                    </div>
+                </div>
+            </InteractiveCard>
+        </SmoothTransition>
+    )
 
     return (
         <section className="relative z-10 py-20 px-4 sm:px-6 lg:px-8">
@@ -121,131 +244,19 @@ export const DeveloperTeam = () => {
                 </SmoothTransition>
 
                 {/* Developer Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {developers.map((dev, i) => (
-                        <SmoothTransition key={i} delay={400 + i * 100}>
-                            <InteractiveCard
-                                className={`bg-gray-800/50 backdrop-blur-xl rounded-2xl p-6 border ${dev.borderColor} shadow-xl relative overflow-hidden transition-all duration-300 hover:shadow-2xl`}
-                                onMouseOver={() => setHoveredDev(i)}
-                                onMouseLeave={() => setHoveredDev(null)}
-                                // onMouseLeave={() => {setHoveredDev(null);console.log('onMouseLeave')}}
-                            >
-                                {/* Background Gradient */}
-                                <div
-                                    className={`absolute inset-0 bg-gradient-to-r ${dev.bgGradient} opacity-0 hover:opacity-100 transition-opacity duration-400`}
-                                ></div>
+                {/* Mobile & Tablet: Normal responsive grid */}
+                <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:hidden">
+                    {developers.map((dev, i) => renderCard(dev, i))}
+                </div>
 
-                                {/* Floating Badge */}
-                                <div className="absolute top-3 -right-2 z-20">
-                                    <div
-                                        className={`bg-gradient-to-r ${dev.gradient} text-white text-xs px-3 py-1 rounded-full font-bold shadow-lg animate-bounce`}
-                                    >
-                                        {dev.teamRole}
-                                    </div>
-                                </div>
-
-                                <div className="relative z-10">
-                                    {/* Avatar */}
-                                    <div className="text-center mb-6">
-                                        <div className="relative inline-block">
-                                            <div
-                                                className={`absolute inset-0 bg-gradient-to-r ${dev.gradient} rounded-full blur-lg opacity-50 animate-pulse`}
-                                            ></div>
-                                            <img
-                                                src={dev.avatar || "/placeholder.svg"}
-                                                alt={dev.name}
-                                                className={`relative w-20 h-20 rounded-full border-2 ${dev.borderColor} transition-all duration-300 hover:scale-110 hover:rotate-3`}
-                                            />
-                                            {/* Online Status */}
-                                            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-gray-800 flex items-center justify-center">
-                                                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Info */}
-                                    <div className="text-center mb-4">
-                                        <h3
-                                            className={`text-xl font-bold text-white mb-1 transition-all duration-300 hover:bg-gradient-to-r hover:${dev.gradient} hover:bg-clip-text`}
-                                        >
-                                            {dev.name}
-                                        </h3>
-                                        <p
-                                            className={`text-sm font-medium bg-gradient-to-r ${dev.gradient} bg-clip-text text-transparent mb-1`}
-                                        >
-                                            {dev.role}
-                                        </p>
-                                        <p className="text-xs text-gray-400 transition-colors duration-300 hover:text-gray-300">
-                                            {dev.speciality}
-                                        </p>
-                                    </div>
-
-                                    {/* Bio */}
-                                    <div
-                                        className={`transition-all duration-300 ${hoveredDev === i ? "max-h-32 opacity-100" : "max-h-0 opacity-0"} overflow-hidden`}
-                                    >
-                                        <p className="text-gray-300 text-sm leading-relaxed mb-4 transition-colors duration-300 hover:text-gray-200">
-                                            {dev.bio}
-                                        </p>
-                                    </div>
-
-                                    {/* Skills */}
-                                    <div className="mb-4">
-                                        <div className="flex flex-wrap gap-1">
-                                            {dev.skills.slice(0, hoveredDev === i ? 4 : 2).map((skill, skillIndex) => (
-                                                <SmoothTransition key={skillIndex} delay={skillIndex * 50}>
-                                                    <span
-                                                        className={`text-xs px-2 py-1 bg-gradient-to-r ${dev.bgGradient} border ${dev.borderColor} rounded-full text-gray-300 transition-all duration-300 hover:scale-105`}
-                                                    >
-                                                        {skill}
-                                                    </span>
-                                                </SmoothTransition>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Social Links */}
-                                    <div className="flex justify-center space-x-3">
-                                        {[
-                                            dev.social?.github && {
-                                                icon: Github,
-                                                url: dev.social.github,
-                                                color: "hover:text-gray-300"
-                                            },
-                                            dev.social?.linkedin && {
-                                                icon: Linkedin,
-                                                url: dev.social.linkedin,
-                                                color: "hover:text-blue-400"
-                                            },
-                                            dev.social?.twitter && {
-                                                icon: Twitter,
-                                                url: dev.social.twitter,
-                                                color: "hover:text-cyan-400"
-                                            },
-                                            dev.social?.email && {
-                                                icon: Mail,
-                                                url: `mailto:${dev.social.email}`,
-                                                color: "hover:text-red-400"
-                                            },
-                                        ]
-                                            .filter(Boolean) 
-                                            .map(({ icon: Icon, url, color }, socialIndex) => (
-                                                <SmoothTransition key={socialIndex} delay={socialIndex * 50}>
-                                                    <a
-                                                        href={url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className={`text-gray-500 ${color} transition-all duration-300 hover:scale-125 hover:-translate-y-1`}
-                                                    >
-                                                        <Icon className="w-4 h-4" />
-                                                    </a>
-                                                </SmoothTransition>
-                                            ))}
-                                    </div>
-                                </div>
-                            </InteractiveCard>
-                        </SmoothTransition>
-                    ))}
+                {/* Desktop: Centered grid */}
+                <div className="hidden lg:flex justify-center">
+                    <div className="grid gap-8" 
+                         style={{
+                             gridTemplateColumns: `repeat(${Math.min(developers.length, 4)}, 300px)`
+                         }}>
+                        {developers.map((dev, i) => renderCard(dev, i))}
+                    </div>
                 </div>
 
                 {/* Team Message */}
@@ -272,34 +283,6 @@ export const DeveloperTeam = () => {
                         </InteractiveCard>
                     </div>
                 </SmoothTransition>
-
-                {/* Contact CTA */}
-                {/* <SmoothTransition delay={1000}>
-          <div className="mt-12 text-center">
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <InteractiveCard>
-                <a
-                  href="mailto:team@anjaymabar.dev"
-                  className="inline-flex items-center bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 border border-orange-400/30"
-                >
-                  <Mail className="w-5 h-5 mr-2" />
-                  Get in Touch
-                </a>
-              </InteractiveCard>
-              <InteractiveCard>
-                <a
-                  href="https://github.com/anjaymabar"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center bg-gray-800/50 hover:bg-gray-700/50 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 border border-gray-700/50 hover:border-gray-600/50 backdrop-blur-xl"
-                >
-                  <Github className="w-5 h-5 mr-2" />
-                  View Our Work
-                </a>
-              </InteractiveCard>
-            </div>
-          </div>
-        </SmoothTransition> */}
             </div>
         </section>
     )
