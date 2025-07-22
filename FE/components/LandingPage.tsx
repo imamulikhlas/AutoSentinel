@@ -165,8 +165,8 @@ export const LandingPage = ({ onNavigate, user, onLogout }: LandingPageProps) =>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
                 {[
                   { number: "All", label: "Smart Contract Can Analyze", icon: Shield },
-                  { number: "99.9%", label: "Accuracy Rate", icon: CheckCircle },
-                  { number: "4", label: "Team Members", icon: Users },
+                  { number: "99.5%", label: "Accuracy Rate", icon: CheckCircle },
+                  { number: "3", label: "Team Members", icon: Users },
                   { number: "24/7", label: "API Uptime", icon: Zap },
                 ].map(({ number, label, icon: Icon }, i) => (
                   <SmoothTransition key={i} delay={300 + i * 100}>
