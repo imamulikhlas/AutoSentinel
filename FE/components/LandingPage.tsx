@@ -232,9 +232,12 @@ export const LandingPage = ({ onNavigate, user, onLogout }: LandingPageProps) =>
           <SmoothTransition delay={0}>
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex items-center">
-                <InteractiveCard className="bg-gradient-to-r from-orange-500 to-red-500 p-3 rounded-2xl border-orange-400/30 mr-4">
-                  <Shield className="w-6 h-6 text-white transition-transform duration-300 hover:rotate-12" />
-                </InteractiveCard>
+                <InteractiveCard className="bg-white/50 backdrop-blur-md p-3 rounded-2xl border-white/10 shadow-inner mr-4">
+              <img
+                src="/assets/logo3.png"
+                alt="Auto Sentinel Logo"
+                className="w-10 h-10 object-contain"
+              />                </InteractiveCard>
                 <div>
                   <div className="text-white font-bold text-xl transition-colors duration-300 hover:text-orange-300">
                     Auto Sentinel
