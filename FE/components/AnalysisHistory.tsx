@@ -46,11 +46,11 @@ export const AnalysisHistory = ({
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-0">
+    <div className="max-w-7xl mx-auto px-4 sm:px-0">
       <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-10 border-gray-700/50 shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 relative overflow-hidden">
         {/* Animated background pattern */}
         <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 animate-gradient-shift"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-600 animate-gradient-shift"></div>
         </div>
 
         <div className="relative z-10">
@@ -58,7 +58,7 @@ export const AnalysisHistory = ({
           {histLoad && (
             <div className="text-center py-16 sm:py-20">
               <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-6 sm:mb-8">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur-2xl opacity-50 animate-pulse"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-600 rounded-full blur-2xl opacity-50 animate-pulse"></div>
                 <div className="relative bg-gray-900/50 rounded-full p-4 sm:p-6 border-gray-700/50">
                   <RefreshCw className="w-8 h-8 sm:w-12 sm:h-12 animate-spin text-blue-400" />
                 </div>
@@ -88,7 +88,7 @@ export const AnalysisHistory = ({
               </p>
               <button
                 onClick={() => setActiveTab("scanner")}
-                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 sm:px-10 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg transition-all transform hover:scale-105 border-blue-400/30"
+                className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-8 sm:px-10 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg transition-all transform hover:scale-105 border-blue-400/30"
               >
                 Start First Analysis
               </button>

@@ -341,7 +341,7 @@ auditContract('0x1234567890123456789012345678901234567890', 'ethereum')
                         </p>
                         <button
                           onClick={() => onNavigate("dashboard")}
-                          className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-all"
+                          className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-6 py-3 rounded-lg font-medium transition-all"
                         >
                           Sign In
                         </button>

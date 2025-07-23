@@ -76,7 +76,7 @@ export const InitialLoader = ({ onLoadingComplete }: InitialLoaderProps) => {
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 e.currentTarget.parentElement.innerHTML = `
-                  <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
                     <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fill-rule="evenodd" d="M10 1L3 6v8l7 5 7-5V6l-7-5zM6.5 8.5l3-2.5 3 2.5v3l-3 2.5-3-2.5v-3z" clip-rule="evenodd"/>
                     </svg>
