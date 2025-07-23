@@ -212,7 +212,7 @@ export const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                         disabled={disabled}
                         className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center space-x-3 relative overflow-hidden whitespace-nowrap ${
                           activeTab === id
-                            ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105 border-blue-400/30"
+                            ? "bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg transform scale-105 border-blue-400/30"
                             : disabled
                               ? "text-gray-600 cursor-not-allowed"
                               : "text-gray-300 hover:text-white hover:bg-gray-700/50 hover:scale-105"

@@ -86,7 +86,7 @@ export const Navigation = ({ onNavigate, user, onLogout }: NavigationProps) => {
             ) : (
               <button
                 onClick={() => handleNavigation("dashboard")}
-                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all border-blue-400/30 font-space-grotesk"
+                className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-4 py-2 rounded-lg font-medium transition-all border-orange-400/30 font-space-grotesk"
               >
                 SIGN IN
               </button>
@@ -148,7 +148,7 @@ export const Navigation = ({ onNavigate, user, onLogout }: NavigationProps) => {
                 <div className="pt-4 border-t border-gray-700/50">
                   <button
                     onClick={() => handleNavigation("dashboard")}
-                    className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all border-blue-400/30 w-full"
+                    className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-4 py-2 rounded-lg font-medium transition-all border-orange-400/30 w-full"
                   >
                     SIGN IN
                   </button>
