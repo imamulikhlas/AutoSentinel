@@ -57,7 +57,7 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
 
           <SmoothTransition delay={100}>
             <div className="text-center mb-8">
-              <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-2xl border-blue-400/30 w-fit mx-auto mb-4">
+              <div className="bg-gradient-to-r from-orange-500 to-red-600 p-3 rounded-2xl border-red-400/30 w-fit mx-auto mb-4">
                 <Shield className="w-8 h-8 text-white" />
               </div>
               <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>

@@ -24,7 +24,7 @@ export const Footer = () => {
         <div className="hidden md:block w-px h-12 sm:h-16 bg-gray-600 animate-pulse"></div>
         {/* Auto Sentinel Info */}
         <div className="flex items-center group hover:scale-105 transition-transform duration-300">
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 sm:p-4 rounded-2xl border-blue-400/30 group-hover:shadow-lg group-hover:shadow-blue-500/20 transition-all duration-300">
+          <div className="bg-gradient-to-r from-orange-500 to-red-600 p-3 sm:p-4 rounded-2xl border-blue-400/30 group-hover:shadow-lg group-hover:shadow-blue-500/20 transition-all duration-300">
             <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-white group-hover:rotate-12 transition-transform" />
           </div>
           <div className="ml-3 sm:ml-4">

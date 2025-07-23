@@ -88,14 +88,14 @@ export const SecurityAnalysis = ({
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-0">
+    <div className="max-w-7xl mx-auto px-4 sm:px-0">
       <InteractiveCard
         glowEffect="blue"
         className="bg-gray-800/50 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-10 border-gray-700/50 shadow-2xl relative overflow-hidden"
       >
         {/* Animated background pattern */}
         <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 animate-gradient-shift"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-600 animate-gradient-shift"></div>
         </div>
 
         <div className="relative z-10">
