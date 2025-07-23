@@ -47,8 +47,8 @@ export const HeroSection = () => {
       <SmoothTransition delay={400}>
         <div className="flex items-center justify-center mb-6 sm:mb-8">
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl sm:rounded-3xl blur-xl sm:blur-2xl opacity-50 animate-pulse"></div>
-            <InteractiveCard className="relative bg-gradient-to-r from-blue-500 to-purple-600 p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-2xl border-blue-400/30">
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl sm:rounded-3xl blur-xl sm:blur-2xl opacity-50 animate-pulse"></div>
+            <InteractiveCard className="relative bg-gradient-to-r from-orange-500 to-red-600 p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-2xl border-blue-400/30">
               <Shield className="w-12 h-12 sm:w-16 sm:h-16 text-white transition-transform duration-300 hover:rotate-12" />
             </InteractiveCard>
           </div>

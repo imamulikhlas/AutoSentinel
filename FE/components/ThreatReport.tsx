@@ -69,7 +69,7 @@ export const ThreatReport = ({ auditData, animatingMetrics, showToast }: ThreatR
     <div className="space-y-8 sm:space-y-10 px-4 sm:px-0">
       {/* Action Bar */}
       <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-6 sm:mb-8">
-        <button
+        {/* <button
           onClick={() => setIsBookmarked(!isBookmarked)}
           className={`flex items-center space-x-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-300 border text-sm sm:text-base ${
             isBookmarked
@@ -83,7 +83,7 @@ export const ThreatReport = ({ auditData, animatingMetrics, showToast }: ThreatR
             <Bookmark className="w-4 h-4 sm:w-5 sm:h-5" />
           )}
           <span className="hidden sm:inline">{isBookmarked ? "Bookmarked" : "Bookmark"}</span>
-        </button>
+        </button> */}
 
         <button
           onClick={downloadReport}
@@ -93,13 +93,13 @@ export const ThreatReport = ({ auditData, animatingMetrics, showToast }: ThreatR
           <span className="hidden sm:inline">Download Report</span>
         </button>
 
-        <button
+        {/* <button
           onClick={shareReport}
           className="flex items-center space-x-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-300 bg-purple-500/20 text-purple-300 border-purple-500/30 hover:bg-purple-500/30 text-sm sm:text-base"
         >
           <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
           <span className="hidden sm:inline">Share Report</span>
-        </button>
+        </button> */}
 
         <button
           onClick={() => setShowAdvancedMode(!showAdvancedMode)}
