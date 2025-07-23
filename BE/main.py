@@ -675,7 +675,7 @@ class IndonesianCrimeDetector:
             }
             
             payload = {
-                "model": "meta-llama/Llama-3.2-90B-Vision-Instruct-Turbo",
+                "model": "Qwen/Qwen2.5-VL-72B-Instruct",
                 "messages": [{"role": "user", "content": prompt}],
                 "max_tokens": 2000,
                 "temperature": 0.3,  # Lower temperature for more consistent analysis
