@@ -150,7 +150,7 @@ class AuditResult(BaseModel):
     risk_score: int
     security_metrics: SecurityMetrics
     vulnerabilities: List[VulnerabilityDetail]
-    # ai_summary: str
+    ai_summary: str
     recommendations: List[str]
     gas_optimization_hints: List[str]
     audit_file_path: str
@@ -2685,10 +2685,10 @@ def audit_contract(data: ContractRequest):
         )
         
         # 8. ✨ Generate comprehensive AI analysis
-        # print("🤖 Generating AI security analysis...")
-        # ai_summary = generate_detailed_summary(
-        #     vulnerabilities, metrics, contract_info, ownership_analysis, trading_analysis, social_presence, contract_stats, indonesian_crime_analysis  
-        # )
+        print("🤖 Generating AI security analysis...")
+        ai_summary = generate_detailed_summary(
+            vulnerabilities, metrics, contract_info, ownership_analysis, trading_analysis, social_presence, contract_stats, indonesian_crime_analysis  
+        )
         
         recommendations = generate_recommendations(vulnerabilities, contract_info, ownership_analysis)
         gas_hints = generate_gas_optimization_hints(vulnerabilities)
@@ -2702,7 +2702,7 @@ def audit_contract(data: ContractRequest):
             risk_score=trust_score,
             security_metrics=metrics,
             vulnerabilities=vulnerabilities,
-            # ai_summary=ai_summary,
+            ai_summary=ai_summary,
             recommendations=recommendations,
             gas_optimization_hints=gas_hints,
             audit_file_path="",  # Will be set below
