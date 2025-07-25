@@ -1,133 +1,127 @@
 "use client"
 
 import { useState } from "react"
-import { Download, Eye, EyeOff, Share2, Bookmark, BookmarkCheck } from "lucide-react"
-import { ThreatStatus } from "./ThreatStatus"
-import { ThreatMetrics } from "./ThreatMetrics"
+import { AlertTriangle, FileText, Shield, Code, Zap, Activity, Scale } from "lucide-react"
 import { SecurityMetrics } from "./SecurityMetrics"
+import { RiskGauge } from "./RiskGauge"
 import { AIAnalysis } from "./AIAnalysis"
 import { SecurityIndicators } from "./SecurityIndicators"
 import { ContractStatistics } from "./ContractStatistics"
 import { VulnerabilitiesList } from "./VulnerabilitiesList"
 import { ContractIntelligence } from "./ContractIntelligence"
-import { SecurityBadge } from "./SecurityBadge"
+import { IndonesianCrimeAnalysis } from "./IndonesianCrimeAnalysis"
+import { ComplianceReport } from "./ComplianceReport"
 import type { AuditData } from "@/types"
+import { ThreatStatus } from "./ThreatStatus"
 
 interface ThreatReportProps {
   auditData: AuditData
-  animatingMetrics: boolean
   showToast: (type: "success" | "error" | "info", message: string) => void
 }
 
-export const ThreatReport = ({ auditData, animatingMetrics, showToast }: ThreatReportProps) => {
-  const [isBookmarked, setIsBookmarked] = useState(false)
-  const [showAdvancedMode, setShowAdvancedMode] = useState(false)
+export const ThreatReport = ({ auditData, showToast }: ThreatReportProps) => {
+  const [activeTab, setActiveTab] = useState("overview")
 
-  const downloadReport = () => {
-    const report = JSON.stringify(auditData, null, 2)
-    const blob = new Blob([report], { type: "application/json" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `security-report-${auditData.contract_address}.json`
-    a.click()
-    URL.revokeObjectURL(url)
-    showToast("success", "Security report downloaded!")
-  }
-
-  const shareReport = async () => {
-    const shareData = {
-      title: "Smart Contract Security Report",
-      text: `Security analysis for ${auditData.contract_address}: ${auditData.risk_level} risk level`,
-      url: window.location.href,
-    }
-
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData)
-        showToast("success", "Report shared successfully!")
-      } catch (err) {
-        // Fallback to clipboard
-        try {
-          await navigator.clipboard.writeText(window.location.href)
-          showToast("success", "Report link copied to clipboard!")
-        } catch (clipErr) {
-          showToast("error", "Failed to share report")
-        }
-      }
-    } else {
-      try {
-        await navigator.clipboard.writeText(window.location.href)
-        showToast("success", "Report link copied to clipboard!")
-      } catch (err) {
-        showToast("error", "Failed to copy link")
-      }
-    }
-  }
+  const tabs = [
+    { id: "overview", label: "Overview", icon: <Activity className="w-4 h-4 mr-2" /> },
+    { id: "vulnerabilities", label: "Vulnerabilities", icon: <AlertTriangle className="w-4 h-4 mr-2" /> },
+    { id: "intelligence", label: "Intelligence", icon: <Zap className="w-4 h-4 mr-2" /> },
+    // { id: "code", label: "Code Analysis", icon: <Code className="w-4 h-4 mr-2" /> },
+    { id: "indonesian", label: "Indonesian Analysis", icon: <Shield className="w-4 h-4 mr-2" /> },
+    { id: "compliance", label: "Compliance Report", icon: <Scale className="w-4 h-4 mr-2" /> },
+  ]
 
   return (
-    <div className="space-y-8 sm:space-y-10 px-4 sm:px-0">
-      {/* Action Bar */}
-      <div className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-6 sm:mb-8">
-        {/* <button
-          onClick={() => setIsBookmarked(!isBookmarked)}
-          className={`flex items-center space-x-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-300 border text-sm sm:text-base ${
-            isBookmarked
-              ? "bg-yellow-500/20 text-yellow-300 border-yellow-500/30 hover:bg-yellow-500/30"
-              : "bg-gray-800/50 text-gray-300 border-gray-700/50 hover:bg-gray-700/50"
-          }`}
-        >
-          {isBookmarked ? (
-            <BookmarkCheck className="w-4 h-4 sm:w-5 sm:h-5" />
-          ) : (
-            <Bookmark className="w-4 h-4 sm:w-5 sm:h-5" />
-          )}
-          <span className="hidden sm:inline">{isBookmarked ? "Bookmarked" : "Bookmark"}</span>
-        </button> */}
+    <div className="w-full max-w-7xl mx-auto">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
+        <div className="mb-4 md:mb-0">
+          <h2 className="text-3xl font-bold text-white">Security Analysis Report</h2>
+          <p className="text-gray-400 mt-1">
+            Contract: <span className="font-mono">{auditData.contract_address}</span>
+          </p>
+        </div>
 
-        <button
-          onClick={downloadReport}
-          className="flex items-center space-x-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-300 bg-blue-500/20 text-blue-300 border-blue-500/30 hover:bg-blue-500/30 text-sm sm:text-base"
-        >
-          <Download className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span className="hidden sm:inline">Download Report</span>
-        </button>
-
-        {/* <button
-          onClick={shareReport}
-          className="flex items-center space-x-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-300 bg-purple-500/20 text-purple-300 border-purple-500/30 hover:bg-purple-500/30 text-sm sm:text-base"
-        >
-          <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-          <span className="hidden sm:inline">Share Report</span>
-        </button> */}
-
-        <button
-          onClick={() => setShowAdvancedMode(!showAdvancedMode)}
-          className={`flex items-center space-x-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-300 border text-sm sm:text-base ${
-            showAdvancedMode
-              ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30"
-              : "bg-gray-800/50 text-gray-300 border-gray-700/50 hover:bg-gray-700/50"
-          }`}
-        >
-          {showAdvancedMode ? <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Eye className="w-4 h-4 sm:w-5 sm:h-5" />}
-          <span className="hidden sm:inline">{showAdvancedMode ? "Simple View" : "Advanced View"}</span>
-          {!showAdvancedMode && (
-            <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded-full ml-1 sm:ml-2 hidden sm:inline">
-              User Friendly
-            </span>
-          )}
-        </button>
+        <div className="flex items-center space-x-2">
+          <div
+            className={`px-3 py-1 rounded-full text-xs font-medium ${
+              auditData.risk_level === "Low"
+                ? "bg-green-500/20 text-green-300"
+                : auditData.risk_level === "Medium"
+                  ? "bg-yellow-500/20 text-yellow-300"
+                  : auditData.risk_level === "High"
+                    ? "bg-orange-500/20 text-orange-300"
+                    : "bg-red-500/20 text-red-300"
+            }`}
+          >
+            {auditData.risk_level} Risk
+          </div>
+          <div className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs font-medium">
+            Score: {auditData.risk_score}/100
+          </div>
+          <div className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-medium">
+            {auditData.chain}
+          </div>
+        </div>
       </div>
 
-      <ThreatStatus auditData={auditData} />
-      <ThreatMetrics auditData={auditData} />
-      <SecurityMetrics auditData={auditData} animatingMetrics={animatingMetrics} showAdvancedMode={showAdvancedMode} />
-      <AIAnalysis auditData={auditData} />
-      <SecurityIndicators auditData={auditData} />
-      <ContractStatistics auditData={auditData} />
-      <VulnerabilitiesList auditData={auditData} showAdvancedMode={showAdvancedMode} />
-      <ContractIntelligence auditData={auditData} showToast={showToast} />
-      <SecurityBadge />
+      <div className="mb-8 overflow-x-auto">
+        <div className="flex space-x-1 min-w-max">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2 rounded-t-lg flex items-center text-sm font-medium transition-all duration-200 ${
+                activeTab === tab.id
+                  ? "bg-gray-800/80 text-white border-t border-l border-r border-purple-500/30"
+                  : "bg-gray-900/50 text-gray-400 hover:bg-gray-800/50 hover:text-gray-300"
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <div className="h-px bg-purple-500/30 w-full"></div>
+      </div>
+
+      <div className="space-y-8">
+        {activeTab === "overview" && (
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2">
+                <SecurityMetrics auditData={auditData} />
+              </div>
+              <div>
+              <ThreatStatus auditData={auditData} />
+              </div>
+            </div>
+            <AIAnalysis auditData={auditData} />
+            <SecurityIndicators auditData={auditData} />
+            <ContractStatistics auditData={auditData} />
+          </>
+        )}
+
+        {activeTab === "vulnerabilities" && <VulnerabilitiesList auditData={auditData} />}
+
+        {activeTab === "intelligence" && <ContractIntelligence auditData={auditData} />}
+
+        {/* {activeTab === "code" && (
+          <div className="bg-gray-800/50 backdrop-blur-xl rounded-xl p-6 border border-gray-700/50">
+            <div className="flex items-center mb-6">
+              <FileText className="w-6 h-6 mr-3 text-blue-400" />
+              <h3 className="text-xl font-bold text-white">Contract Code Analysis</h3>
+            </div>
+            <p className="text-gray-400">
+              The detailed code analysis would be displayed here, showing the contract source code with highlighted
+              vulnerabilities and issues.
+            </p>
+          </div>
+        )} */}
+
+        {activeTab === "indonesian" && <IndonesianCrimeAnalysis auditData={auditData} />}
+
+        {activeTab === "compliance" && <ComplianceReport auditData={auditData} showToast={showToast} />}
+      </div>
     </div>
   )
 }

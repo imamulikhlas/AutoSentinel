@@ -12,8 +12,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional,Union
 from dotenv import load_dotenv
+from enum import Enum
 
 load_dotenv()
 TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")
@@ -124,7 +125,34 @@ class IndonesianCrimeAnalysis:
     satgas_pasti_report_needed: bool = False
     ojk_compliance_status: str = "UNKNOWN"               # COMPLIANT, NON_COMPLIANT, UNKNOWN
     recommended_actions: List[str] = field(default_factory=list)
+    # NEW: Behavioral analysis fields
+    indonesian_behavior_score: int = 0
+    timezone_analysis: Dict = field(default_factory=dict)
+    exchange_interactions: Dict = field(default_factory=dict)
+    structuring_detected: bool = False
 
+
+@dataclass
+class RegulatoryViolation:
+    violation_type: str              # "judi_online", "ponzi_mlm", etc
+    law_article: str                 # "UU ITE Pasal 27 ayat (2)"
+    penalty_description: str         # "Pidana penjara maksimal 6 tahun"
+    fine_amount: str                 # "Rp 1 miliar"
+    enforcement_agency: str          # "Kepolisian, Kominfo"
+    severity_level: str              # "RINGAN", "SEDANG", "BERAT"
+    satgas_pasti_priority: bool      # True if high priority for Satgas PASTI
+    compliance_action: str           # "IMMEDIATE_BLOCK", "MONITOR", "INVESTIGATE"
+
+@dataclass 
+class ComplianceReport:
+    contract_address: str
+    scan_timestamp: str
+    total_violations: int
+    violations: List[RegulatoryViolation] = field(default_factory=list)
+    compliance_status: str = "COMPLIANT"    # COMPLIANT, NON_COMPLIANT, REQUIRES_REVIEW
+    satgas_pasti_report_required: bool = False
+    recommended_actions: List[str] = field(default_factory=list)
+    legal_risk_score: int = 0               # 0-100
 
 class SecurityMetrics(BaseModel):
     total_issues: int
@@ -141,6 +169,11 @@ class SecurityMetrics(BaseModel):
     unique_users: int = 0
     indonesia_crime_risk: int = 0     
     indonesia_targeting_detected: bool = False
+     # Regulatory compliance metrics  
+    legal_risk_score: int = 0
+    regulatory_violations_count: int = 0
+    satgas_pasti_report_required: bool = False
+    compliance_status: str = "UNKNOWN"  # COMPLIANT, NON_COMPLIANT, REQUIRES_REVIEW
 
 class AuditResult(BaseModel):
     contract_address: str
@@ -159,6 +192,7 @@ class AuditResult(BaseModel):
     trading_analysis: TradingAnalysis
     social_presence: SocialPresence
     indonesian_crime_analysis: IndonesianCrimeAnalysis
+    compliance_report: ComplianceReport
 
 
 class EtherscanAPI:
@@ -250,7 +284,7 @@ class EtherscanAPI:
                 "startblock": 0,
                 "endblock": 99999999,
                 "page": 1,
-                "offset": 1000,
+                "offset": 2000,
                 "sort": "desc",
                 "apikey": self.api_key
             }
@@ -269,6 +303,17 @@ class EtherscanAPI:
                     unique_addresses.add(tx.get("to", "").lower())
                 
                 stats["unique_users"] = len(unique_addresses) - 1
+
+                # NEW: Store detailed transaction data for behavioral analysis
+                stats["detailed_transactions"] = []
+                for tx in transactions[:500]:  # Limit untuk memory efficiency
+                    stats["detailed_transactions"].append({
+                        "timestamp": int(tx.get("timeStamp", 0)),
+                        "from": tx.get("from", "").lower(),
+                        "to": tx.get("to", "").lower(), 
+                        "value_eth": float(tx.get("value", 0)) / 10**18,
+                        "gas_used": int(tx.get("gasUsed", 0))
+                    })
             
             # 3. Get contract balance
             balance_params = {
@@ -421,6 +466,321 @@ class HoneypotDetector:
             if re.search(pattern, source_code, re.IGNORECASE):
                 return True
         return False
+    
+class IndonesianRegulatoryMapper:
+    """Database dan mapper untuk regulasi Indonesia"""
+    
+    def __init__(self):
+        # Database lengkap regulasi Indonesia
+        self.regulatory_database = self._build_regulatory_database()
+        
+    def _build_regulatory_database(self) -> Dict:
+        """Build comprehensive database regulasi Indonesia"""
+        return {
+            # ===== JUDI ONLINE =====
+            "judi_online": {
+                "primary_law": {
+                    "article": "UU ITE Pasal 27 ayat (2)",
+                    "description": "Setiap orang dengan sengaja dan tanpa hak mendistribusikan informasi yang bermuatan perjudian",
+                    "penalty": "Pidana penjara paling lama 6 tahun dan/atau denda paling banyak Rp 1 miliar",
+                    "enforcement": ["Kepolisian", "Kominfo", "Satgas PASTI"],
+                    "severity": "BERAT"
+                },
+                "supporting_laws": [
+                    {
+                        "article": "KUHP Pasal 303",
+                        "description": "Permainan judi",
+                        "penalty": "Pidana penjara paling lama 10 tahun atau denda paling banyak Rp 25 juta"
+                    },
+                    {
+                        "article": "PP No. 9 Tahun 2021",
+                        "description": "Penyelenggaraan judi online dilarang",
+                        "penalty": "Sanksi administratif dan pidana"
+                    }
+                ],
+                "satgas_pasti_priority": True,
+                "compliance_action": "IMMEDIATE_BLOCK"
+            },
+            
+            # ===== PONZI/MLM =====
+            "ponzi_mlm": {
+                "primary_law": {
+                    "article": "POJK No. 27/2024 tentang Investasi Ilegal",
+                    "description": "Kegiatan investasi tanpa izin dari OJK",
+                    "penalty": "Pidana penjara paling lama 10 tahun dan denda Rp 10 miliar",
+                    "enforcement": ["OJK", "Kepolisian", "Kejaksaan"],
+                    "severity": "BERAT"
+                },
+                "supporting_laws": [
+                    {
+                        "article": "UU No. 8 Tahun 1995 tentang Pasar Modal",
+                        "description": "Penawaran umum tanpa izin",
+                        "penalty": "Pidana penjara dan denda sesuai UU Pasar Modal"
+                    },
+                    {
+                        "article": "UU No. 7 Tahun 2014 tentang Perdagangan",
+                        "description": "Skema piramida dalam perdagangan",
+                        "penalty": "Sanksi administratif dan pidana"
+                    }
+                ],
+                "satgas_pasti_priority": True,
+                "compliance_action": "INVESTIGATE"
+            },
+            
+            # ===== MONEY LAUNDERING =====
+            "money_laundering": {
+                "primary_law": {
+                    "article": "UU No. 8 Tahun 2010 tentang TPPU",
+                    "description": "Tindak pidana pencucian uang",
+                    "penalty": "Pidana penjara paling lama 20 tahun dan denda Rp 10 miliar",
+                    "enforcement": ["PPATK", "Kepolisian", "Kejaksaan", "KPK"],
+                    "severity": "BERAT"
+                },
+                "supporting_laws": [
+                    {
+                        "article": "SE BI No. 18/40/DKSP tahun 2016",
+                        "description": "Penerapan program APU-PPT untuk Virtual Currency",
+                        "penalty": "Sanksi administratif dari Bank Indonesia"
+                    }
+                ],
+                "satgas_pasti_priority": True,
+                "compliance_action": "IMMEDIATE_BLOCK"
+            },
+            
+            # ===== TOKEN SCAM =====
+            "token_scam": {
+                "primary_law": {
+                    "article": "POJK No. 27/2024 tentang Token Penipuan",
+                    "description": "Penerbitan token digital tanpa izin dengan maksud menipu",
+                    "penalty": "Pidana penjara paling lama 8 tahun dan denda Rp 5 miliar",
+                    "enforcement": ["OJK", "Bappebti", "Kepolisian"],
+                    "severity": "BERAT"
+                },
+                "supporting_laws": [
+                    {
+                        "article": "UU ITE Pasal 28 ayat (1)",
+                        "description": "Penyebaran berita bohong dan menyesatkan",
+                        "penalty": "Pidana penjara paling lama 6 tahun dan denda Rp 1 miliar"
+                    }
+                ],
+                "satgas_pasti_priority": True,
+                "compliance_action": "IMMEDIATE_BLOCK"
+            },
+            
+            # ===== INDONESIAN TARGETING =====
+            "indonesian_targeting": {
+                "primary_law": {
+                    "article": "UU No. 11 Tahun 2020 tentang Cipta Kerja",
+                    "description": "Penyelenggaraan kegiatan finansial tanpa izin yang menargetkan WNI",
+                    "penalty": "Sanksi administratif dan pidana sesuai sektor",
+                    "enforcement": ["OJK", "BI", "Bappebti", "Kominfo"],
+                    "severity": "SEDANG"
+                },
+                "supporting_laws": [
+                    {
+                        "article": "SE OJK No. 6/SEOJK.02/2022",
+                        "description": "Larangan promosi investasi tanpa izin kepada masyarakat Indonesia",
+                        "penalty": "Sanksi administratif dari OJK"
+                    }
+                ],
+                "satgas_pasti_priority": False,
+                "compliance_action": "MONITOR"
+            },
+            
+            # ===== SMART CONTRACT VULNERABILITIES =====
+            "reentrancy": {
+                "primary_law": {
+                    "article": "KUHP Pasal 362 tentang Pencurian",
+                    "description": "Mengambil hak milik orang lain melalui kerentanan teknis",
+                    "penalty": "Pidana penjara paling lama 5 tahun",
+                    "enforcement": ["Kepolisian", "Kejaksaan"],
+                    "severity": "SEDANG"
+                },
+                "supporting_laws": [
+                    {
+                        "article": "UU ITE Pasal 30",
+                        "description": "Mengakses komputer dan/atau sistem elektronik orang lain tanpa izin",
+                        "penalty": "Pidana penjara paling lama 6 tahun dan denda Rp 600 juta"
+                    }
+                ],
+                "satgas_pasti_priority": False,
+                "compliance_action": "INVESTIGATE"
+            },
+            
+            "arbitrary-send-eth": {
+                "primary_law": {
+                    "article": "KUHP Pasal 378 tentang Penipuan",
+                    "description": "Penipuan dengan menggunakan kerentanan smart contract",
+                    "penalty": "Pidana penjara paling lama 4 tahun",
+                    "enforcement": ["Kepolisian", "Kejaksaan"],
+                    "severity": "SEDANG"
+                },
+                "supporting_laws": [],
+                "satgas_pasti_priority": False,
+                "compliance_action": "MONITOR"
+            }
+        }
+    
+    def map_vulnerability_to_law(self, vulnerability_type: str, severity: str = "Unknown") -> RegulatoryViolation:
+        """Map vulnerability type ke specific Indonesian law"""
+        
+        # Normalize vulnerability type
+        vuln_key = vulnerability_type.lower().replace("-", "_")
+        
+        # Check if we have specific mapping
+        if vuln_key in self.regulatory_database:
+            law_data = self.regulatory_database[vuln_key]
+            primary = law_data["primary_law"]
+            
+            return RegulatoryViolation(
+                violation_type=vulnerability_type,
+                law_article=primary["article"],
+                penalty_description=primary["penalty"],
+                fine_amount=self._extract_fine_amount(primary["penalty"]),
+                enforcement_agency=", ".join(primary["enforcement"]),
+                severity_level=primary["severity"],
+                satgas_pasti_priority=law_data["satgas_pasti_priority"],
+                compliance_action=law_data["compliance_action"]
+            )
+        
+        # Fallback untuk vulnerability yang belum ada mapping
+        return self._create_general_violation(vulnerability_type, severity)
+    
+    def _extract_fine_amount(self, penalty_text: str) -> str:
+        """Extract fine amount from penalty description"""
+        import re
+        
+        # Pattern untuk mencari nominal denda
+        patterns = [
+            r'Rp\s*([\d.,]+\s*(?:miliar|juta|ribu)?)',
+            r'denda.*?Rp\s*([\d.,]+\s*(?:miliar|juta|ribu)?)',
+            r'([\d.,]+\s*(?:miliar|juta|ribu))'
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, penalty_text, re.IGNORECASE)
+            if match:
+                return f"Rp {match.group(1)}"
+        
+        return "Sesuai ketentuan UU"
+    
+    def _create_general_violation(self, vulnerability_type: str, severity: str) -> RegulatoryViolation:
+        """Create general regulatory violation untuk unmapped vulnerabilities"""
+        
+        # Determine appropriate law based on severity
+        if severity.upper() in ["CRITICAL", "HIGH"]:
+            return RegulatoryViolation(
+                violation_type=vulnerability_type,
+                law_article="UU ITE Pasal 30 ayat (1)",
+                penalty_description="Pidana penjara paling lama 6 tahun dan/atau denda paling banyak Rp 600 juta",
+                fine_amount="Rp 600 juta",
+                enforcement_agency="Kepolisian, Kejaksaan",
+                severity_level="SEDANG",
+                satgas_pasti_priority=False,
+                compliance_action="MONITOR"
+            )
+        else:
+            return RegulatoryViolation(
+                violation_type=vulnerability_type,
+                law_article="Peraturan OJK tentang Teknologi Finansial",
+                penalty_description="Sanksi administratif sesuai ketentuan OJK",
+                fine_amount="Sesuai ketentuan OJK",
+                enforcement_agency="OJK",
+                severity_level="RINGAN",
+                satgas_pasti_priority=False,
+                compliance_action="MONITOR"
+            )
+    
+    def generate_compliance_report(
+        self, 
+        contract_address: str,
+        vulnerabilities: List,
+        indonesian_crime_analysis,
+        contract_info
+    ) -> ComplianceReport:
+        """Generate comprehensive compliance report"""
+        
+        violations = []
+        total_risk_score = 0
+        
+        # 1. Map technical vulnerabilities
+        for vuln in vulnerabilities:
+            if vuln.severity.upper() in ["CRITICAL", "HIGH"]:
+                violation = self.map_vulnerability_to_law(vuln.type, vuln.severity)
+                violations.append(violation)
+                
+                # Add to risk score based on severity
+                if vuln.severity.upper() == "CRITICAL":
+                    total_risk_score += 25
+                elif vuln.severity.upper() == "HIGH":
+                    total_risk_score += 15
+        
+        # 2. Map Indonesian crime patterns
+        if indonesian_crime_analysis and indonesian_crime_analysis.detected_crimes:
+            for crime in indonesian_crime_analysis.detected_crimes:
+                violation = self.map_vulnerability_to_law(crime.crime_type, crime.severity)
+                violations.append(violation)
+                total_risk_score += (crime.risk_score // 4)  # Convert to legal risk scale
+        
+        # 3. Determine overall compliance status
+        compliance_status = "COMPLIANT"
+        satgas_pasti_required = False
+        
+        if total_risk_score >= 70:
+            compliance_status = "NON_COMPLIANT"
+            satgas_pasti_required = True
+        elif total_risk_score >= 40:
+            compliance_status = "REQUIRES_REVIEW"
+        
+        # Check for high-priority violations
+        high_priority_violations = [v for v in violations if v.satgas_pasti_priority]
+        if high_priority_violations:
+            satgas_pasti_required = True
+            compliance_status = "NON_COMPLIANT"
+        
+        # 4. Generate recommended actions
+        recommended_actions = self._generate_compliance_actions(violations, compliance_status)
+        
+        return ComplianceReport(
+            contract_address=contract_address,
+            scan_timestamp=datetime.now().isoformat(),
+            total_violations=len(violations),
+            violations=violations,
+            compliance_status=compliance_status,
+            satgas_pasti_report_required=satgas_pasti_required,
+            recommended_actions=recommended_actions,
+            legal_risk_score=min(100, total_risk_score)
+        )
+    
+    def _generate_compliance_actions(self, violations: List[RegulatoryViolation], status: str) -> List[str]:
+        """Generate specific compliance actions based on violations"""
+        actions = []
+        
+        if status == "NON_COMPLIANT":
+            actions.append("🚨 URGENT: Laporkan ke Satgas PASTI dalam 24 jam")
+            actions.append("🚫 Blokir semua interaksi dengan kontrak ini")
+            actions.append("📢 Publikasikan peringatan publik")
+        
+        # Specific actions based on violation types
+        immediate_block = any(v.compliance_action == "IMMEDIATE_BLOCK" for v in violations)
+        if immediate_block:
+            actions.append("⛔ Blokir akses kontrak melalui ISP/DNS filtering")
+        
+        investigate_needed = any(v.compliance_action == "INVESTIGATE" for v in violations)
+        if investigate_needed:
+            actions.append("🔍 Lakukan investigasi mendalam dengan tim cyber crime")
+        
+        if any("judi" in v.violation_type for v in violations):
+            actions.append("🎰 Koordinasi dengan Kominfo untuk pemblokiran konten judi")
+        
+        if any("money_laundering" in v.violation_type for v in violations):
+            actions.append("💰 Laporkan ke PPATK untuk analisis transaksi mencurigakan")
+        
+        if status == "REQUIRES_REVIEW":
+            actions.append("📋 Lakukan monitoring intensif selama 30 hari")
+            actions.append("⚠️ Berikan peringatan kepada pengguna")
+        
+        return actions
 
 class SocialAnalyzer:
     def __init__(self):
@@ -599,8 +959,11 @@ class IndonesianCrimeDetector:
             # 2. AI-powered deep analysis
             ai_analysis = self._ai_crime_analysis(source_code, contract_name, social_presence, contract_stats)
             
-            # 3. Combine results
-            final_analysis = self._combine_analysis(quick_analysis, ai_analysis)
+            # 3. NEW: Behavioral analysis dari transaction data
+            behavioral_analysis = self._analyze_transaction_behavior(contract_stats)
+
+            # 4. Combine results
+            final_analysis = self._combine_analysis(quick_analysis, ai_analysis, behavioral_analysis)
             
             return final_analysis
             
@@ -837,7 +1200,7 @@ MULAI ANALISIS:
                 "raw_response": ai_content[:500]  # First 500 chars for debugging
             }
     
-    def _combine_analysis(self, quick_analysis: Dict, ai_analysis: Dict) -> IndonesianCrimeAnalysis:
+    def _combine_analysis(self, quick_analysis: Dict, ai_analysis: Dict, behavioral_analysis: Dict = None) -> IndonesianCrimeAnalysis:
         """Combine quick pattern detection dengan AI analysis"""
         
         detected_crimes = []
@@ -927,7 +1290,332 @@ MULAI ANALISIS:
             ojk_compliance_status=ojk_compliance,
             recommended_actions=recommended_actions
         )
+        
+    def _analyze_transaction_behavior(self, contract_stats: Dict = None) -> Dict:
+        """Analyze Indonesian user behavior dari transaction patterns"""
+        
+        print(f"🔍 DEBUG: contract_stats keys: {contract_stats.keys() if contract_stats else 'None'}")
+        
+        if not contract_stats or "detailed_transactions" not in contract_stats:
+            print("❌ No detailed_transactions in contract_stats")
+            return {"error": "No transaction data available"}
+        
+        transactions = contract_stats["detailed_transactions"]
+        print(f"🔍 DEBUG: Found {len(transactions)} detailed transactions")
+        
+        if len(transactions) < 10:
+            print(f"❌ Insufficient transaction data: {len(transactions)} < 10")
+            return {"error": "Insufficient transaction data"}
+        
+        try:
+            print("🔍 DEBUG: Starting timezone analysis...")
+            # 1. WIB Timezone Analysis
+            timezone_analysis = self._analyze_wib_timezone_patterns(transactions)
+            print(f"🔍 DEBUG: Timezone analysis completed: {timezone_analysis}")
+            
+            print("🔍 DEBUG: Starting exchange analysis...")
+            # 2. Indonesian Exchange Detection
+            exchange_analysis = self._detect_indonesian_exchange_interactions(transactions)
+            print(f"🔍 DEBUG: Exchange analysis completed: {exchange_analysis}")
+            
+            print("🔍 DEBUG: Starting structuring analysis...")
+            # 3. Structuring Pattern Detection  
+            structuring_analysis = self._detect_structuring_patterns(transactions)
+            print(f"🔍 DEBUG: Structuring analysis completed: {structuring_analysis}")
+            
+            print("🔍 DEBUG: Calculating behavior score...")
+            # 4. Calculate Indonesian User Behavior Score
+            behavior_score = self._calculate_indonesian_behavior_score(
+                timezone_analysis, exchange_analysis, structuring_analysis
+            )
+            print(f"🔍 DEBUG: Behavior score: {behavior_score}")
+            
+            result = {
+                "success": True,
+                "indonesian_behavior_score": behavior_score,
+                "timezone_analysis": timezone_analysis,
+                "exchange_analysis": exchange_analysis, 
+                "structuring_analysis": structuring_analysis
+            }
+            
+            print(f"🔍 DEBUG: Final result: {result}")
+            return result
+            
+        except Exception as e:
+            print(f"❌ Behavioral analysis failed: {e}")
+            import traceback
+            traceback.print_exc()  # Print full error traceback
+            return {"error": str(e)}
+        
+    def _analyze_wib_timezone_patterns(self, transactions: List[Dict]) -> Dict:
+        """Detect WIB timezone usage patterns"""
+        from datetime import datetime, timezone, timedelta
+        
+        # WIB = UTC+7
+        wib_offset = timedelta(hours=7)
+        wib_tz = timezone(wib_offset)
+        
+        hour_distribution = {}
+        weekend_activity = 0
+        weekday_activity = 0
+        
+        for tx in transactions:
+            if tx["timestamp"] == 0:
+                continue
+                
+            # Convert to WIB
+            utc_time = datetime.fromtimestamp(tx["timestamp"], tz=timezone.utc)
+            wib_time = utc_time.astimezone(wib_tz)
+            
+            # Count hourly distribution
+            hour = wib_time.hour
+            hour_distribution[hour] = hour_distribution.get(hour, 0) + 1
+            
+            # Weekend vs weekday
+            if wib_time.weekday() >= 5:  # Saturday = 5, Sunday = 6
+                weekend_activity += 1
+            else:
+                weekday_activity += 1
+        
+        # Analyze patterns
+        total_tx = len(transactions)
+        prime_time_hours = [19, 20, 21, 22]  # 7PM-10PM WIB
+        prime_time_activity = sum(hour_distribution.get(h, 0) for h in prime_time_hours)
+        
+        # Night activity (12AM-6AM) might indicate bot
+        night_hours = [0, 1, 2, 3, 4, 5]
+        night_activity = sum(hour_distribution.get(h, 0) for h in night_hours)
+        
+        # Calculate probabilities
+        prime_time_ratio = prime_time_activity / total_tx if total_tx > 0 else 0
+        night_activity_ratio = night_activity / total_tx if total_tx > 0 else 0
+        weekend_ratio = weekend_activity / total_tx if total_tx > 0 else 0
+        
+        # Indonesian timezone probability
+        indonesia_probability = 0.0
+        if prime_time_ratio > 0.3:  # 30%+ during prime time
+            indonesia_probability += 0.4
+        if weekend_ratio > 0.2:  # Active on weekends
+            indonesia_probability += 0.2
+        if night_activity_ratio < 0.2:  # Low night activity (human behavior)
+            indonesia_probability += 0.3
+        
+        return {
+            "hour_distribution": hour_distribution,
+            "prime_time_activity_ratio": round(prime_time_ratio, 3),
+            "night_activity_ratio": round(night_activity_ratio, 3), 
+            "weekend_activity_ratio": round(weekend_ratio, 3),
+            "indonesia_timezone_probability": round(indonesia_probability, 3),
+            "bot_behavior_detected": night_activity_ratio > 0.5,
+            "peak_activity_hours": sorted(hour_distribution.items(), key=lambda x: x[1], reverse=True)[:3]
+        }
+    
+    def _detect_indonesian_exchange_interactions(self, transactions: List[Dict]) -> Dict:
+        """Detect Indonesian exchange/service patterns dynamically"""
+        
+        # Analyze transaction patterns instead of hardcoded addresses
+        address_frequency = {}
+        total_volume = {}
+        
+        for tx in transactions:
+            from_addr = tx.get("from", "")
+            to_addr = tx.get("to", "")
+            value = tx.get("value_eth", 0)
+            
+            # Count frequency and volume for each address
+            if from_addr:
+                address_frequency[from_addr] = address_frequency.get(from_addr, 0) + 1
+                total_volume[from_addr] = total_volume.get(from_addr, 0) + value
+            if to_addr:
+                address_frequency[to_addr] = address_frequency.get(to_addr, 0) + 1
+                total_volume[to_addr] = total_volume.get(to_addr, 0) + value
+        
+        # Find exchange-like addresses (high frequency, high volume)
+        exchange_like_addresses = []
+        for addr, freq in address_frequency.items():
+            if freq >= 10:  # Appears in 10+ transactions
+                volume = total_volume.get(addr, 0)
+                if volume > 1.0:  # High volume (>1 ETH total)
+                    exchange_like_addresses.append({
+                        "address": addr[:10] + "...",  # Privacy
+                        "frequency": freq,
+                        "total_volume": round(volume, 3)
+                    })
+        
+        # Indonesian timing patterns (peak hours analysis)
+        indonesian_timing_score = self._calculate_indonesian_timing_score(transactions)
+        
+        return {
+            "exchange_like_addresses": len(exchange_like_addresses),
+            "high_frequency_interactions": len([f for f in address_frequency.values() if f >= 5]),
+            "interaction_diversity": len(address_frequency),
+            "indonesian_timing_score": indonesian_timing_score,
+            "suspected_service_providers": exchange_like_addresses[:3]  # Top 3
+        }
+    
+    def _detect_structuring_patterns(self, transactions: List[Dict]) -> Dict:
+        """Dynamic structuring pattern detection"""
+        
+        values = [tx.get("value_eth", 0) for tx in transactions if tx.get("value_eth", 0) > 0]
+        
+        if len(values) < 10:
+            return {
+                "structuring_detected": False, 
+                "reason": "Insufficient value transactions",
+                "total_value_transactions": len(values)
+            }
+        
+        # 1. Recurring amount detection
+        amount_groups = {}
+        for value in values:
+            # Group similar amounts (within 1% tolerance)
+            grouped = False
+            for existing_amount in amount_groups.keys():
+                if abs(value - existing_amount) / max(existing_amount, 0.001) < 0.01:  # 1% tolerance
+                    amount_groups[existing_amount].append(value)
+                    grouped = True
+                    break
+            if not grouped:
+                amount_groups[value] = [value]
+        
+        # Find suspicious recurring patterns
+        suspicious_patterns = []
+        for base_amount, similar_amounts in amount_groups.items():
+            if len(similar_amounts) >= 3:  # 3+ similar transactions
+                avg_amount = sum(similar_amounts) / len(similar_amounts)
+                suspicious_patterns.append({
+                    "amount_eth": round(avg_amount, 4),
+                    "occurrences": len(similar_amounts),
+                    "percentage": round(len(similar_amounts) / len(values) * 100, 1)
+                })
+        
+        # 2. Round number detection (Wei-level analysis)
+        round_numbers = 0
+        for value in values:
+            wei_value = int(value * 10**18)
+            # Check for round numbers in wei (lots of trailing zeros)
+            if wei_value > 0 and (wei_value % 10**15 == 0 or wei_value % 10**16 == 0):
+                round_numbers += 1
+        
+        round_ratio = round_numbers / len(values)
+        
+        # 3. Size consistency (structuring often uses consistent small amounts)
+        avg_value = sum(values) / len(values)
+        small_consistent_tx = len([v for v in values if 0.01 <= v <= 0.5])  # 0.01-0.5 ETH range
+        consistency_ratio = small_consistent_tx / len(values)
+        
+        # Overall structuring score
+        structuring_score = 0
+        if len(suspicious_patterns) > 0:
+            structuring_score += 0.4
+        if round_ratio > 0.2:
+            structuring_score += 0.3
+        if consistency_ratio > 0.6:
+            structuring_score += 0.3
+        
+        return {
+            "structuring_detected": structuring_score > 0.5,
+            "structuring_confidence": round(structuring_score, 3),
+            "suspicious_recurring_patterns": suspicious_patterns,
+            "round_number_ratio": round(round_ratio, 3),
+            "consistency_ratio": round(consistency_ratio, 3),
+            "average_transaction_value": round(avg_value, 4),
+            "total_value_transactions": len(values)
+        }
+    
+    def _calculate_indonesian_timing_score(self, transactions: List[Dict]) -> float:
+        """Calculate score for Indonesian-like timing patterns"""
+        from datetime import datetime, timezone, timedelta
+        
+        if len(transactions) < 20:
+            return 0.0
+        
+        # Convert to WIB and analyze patterns
+        wib_hours = []
+        weekday_activity = 0
+        weekend_activity = 0
+        
+        wib_tz = timezone(timedelta(hours=7))
+        
+        for tx in transactions:
+            if tx.get("timestamp", 0) == 0:
+                continue
+                
+            utc_time = datetime.fromtimestamp(tx["timestamp"], tz=timezone.utc)
+            wib_time = utc_time.astimezone(wib_tz)
+            
+            wib_hours.append(wib_time.hour)
+            
+            if wib_time.weekday() >= 5:  # Weekend
+                weekend_activity += 1
+            else:
+                weekday_activity += 1
+        
+        if len(wib_hours) == 0:
+            return 0.0
+        
+        # Indonesian patterns scoring
+        score = 0.0
+        
+        # Peak hours (19-22 WIB = after work hours)
+        peak_hours = [19, 20, 21, 22]
+        peak_activity = len([h for h in wib_hours if h in peak_hours])
+        if peak_activity / len(wib_hours) > 0.3:  # 30%+ in peak hours
+            score += 0.4
+        
+        # Low night activity (human-like behavior)
+        night_hours = [0, 1, 2, 3, 4, 5]
+        night_activity = len([h for h in wib_hours if h in night_hours])
+        if night_activity / len(wib_hours) < 0.2:  # <20% night activity
+            score += 0.3
+        
+        # Weekend activity (Indonesian users are active on weekends)
+        if weekend_activity > 0 and weekend_activity / len(transactions) > 0.1:
+            score += 0.3
+        
+        return round(score, 3)
 
+    def _calculate_indonesian_behavior_score(self, timezone_analysis: Dict, exchange_analysis: Dict, structuring_analysis: Dict) -> int:
+        """Calculate overall Indonesian user behavior score"""
+        
+        score = 0
+        
+        # WIB timezone patterns (max 40 points)
+        if timezone_analysis.get("indonesia_timezone_probability", 0) > 0.7:
+            score += 40
+        elif timezone_analysis.get("indonesia_timezone_probability", 0) > 0.4:
+            score += 20
+        
+        # Indonesian exchange interactions (max 30 points)
+        interaction_pct = exchange_analysis.get("interaction_percentage", 0)
+        if interaction_pct > 0.1:  # >10% interactions
+            score += 30
+        elif interaction_pct > 0.05:  # >5% interactions
+            score += 15
+        
+        # Structuring patterns (max 20 points) 
+        if structuring_analysis.get("structuring_detected", False):
+            confidence = structuring_analysis.get("structuring_confidence", 0)
+            score += int(20 * confidence)
+        
+        # Bot behavior penalty (max -10 points)
+        if timezone_analysis.get("bot_behavior_detected", False):
+            score -= 10
+        
+        # Bonus for multiple indicators (max 10 points)
+        indicators = 0
+        if timezone_analysis.get("indonesia_timezone_probability", 0) > 0.5:
+            indicators += 1
+        if exchange_analysis.get("indonesian_exchange_interactions", 0) > 0:
+            indicators += 1  
+        if structuring_analysis.get("structuring_detected", False):
+            indicators += 1
+            
+        if indicators >= 2:
+            score += 10
+        
+        return max(0, min(100, score))
+    
 def parse_slither_results(slither_data: dict) -> List[VulnerabilityDetail]:
     """Parse Slither JSON output into VulnerabilityDetail objects"""
     vulnerabilities = []
@@ -2664,6 +3352,16 @@ def audit_contract(data: ContractRequest):
             social_presence,
             contract_stats
         )
+
+         # 🆕 NEW: Regulatory Compliance Analysis
+        print("⚖️ Running regulatory compliance analysis...")
+        regulatory_mapper = IndonesianRegulatoryMapper()
+        compliance_report = regulatory_mapper.generate_compliance_report(
+            address,
+            vulnerabilities,
+            indonesian_crime_analysis,
+            contract_info
+        )
         
         # 6. ✨ Calculate comprehensive security metrics
         metrics = calculate_security_metrics(vulnerabilities, contract_stats.get("balance_eth", 0))
@@ -2672,6 +3370,10 @@ def audit_contract(data: ContractRequest):
         metrics.unique_users = contract_stats.get("unique_users", 0)
         metrics.indonesia_crime_risk = indonesian_crime_analysis.overall_crime_risk
         metrics.indonesia_targeting_detected = indonesian_crime_analysis.is_targeting_indonesia
+        metrics.legal_risk_score = compliance_report.legal_risk_score
+        metrics.regulatory_violations_count = compliance_report.total_violations
+        metrics.satgas_pasti_report_required = compliance_report.satgas_pasti_report_required
+        metrics.compliance_status = compliance_report.compliance_status
         
         # Calculate overall trust score
         trust_score = calculate_trust_score(
@@ -2710,7 +3412,8 @@ def audit_contract(data: ContractRequest):
             ownership_analysis=ownership_analysis,
             trading_analysis=trading_analysis,
             social_presence=social_presence,
-            indonesian_crime_analysis=indonesian_crime_analysis
+            indonesian_crime_analysis=indonesian_crime_analysis,
+            compliance_report=compliance_report
         )
         
         # 10. ✅ SAVE COMPLETE AUDIT RESULT (not raw slither)
@@ -2725,7 +3428,7 @@ def audit_contract(data: ContractRequest):
         full_audit_path = os.path.join(audit_results_dir, full_audit_filename)
         
         # Convert to dict for JSON serialization
-        audit_dict = audit_result.dict()
+        audit_dict = audit_result.model_dump()
         
         with open(full_audit_path, 'w', encoding='utf-8') as f:
             json.dump(audit_dict, f, indent=2, ensure_ascii=False)
@@ -2936,6 +3639,99 @@ def get_audit_history(address: str):
                 continue
     
     return {"address": address, "history": history}
+
+@app.get("/compliance-report/{address}")
+def get_compliance_report(address: str, chain: str = "ethereum"):
+    """Get regulatory compliance report for specific contract"""
+    
+    try:
+        # Load latest audit result
+        audit_results_dir = "audit_results"
+        wallet_short = address[:10]
+        
+        # Find latest audit file
+        audit_files = [
+            f for f in os.listdir(audit_results_dir) 
+            if f.startswith(f"audit_{wallet_short}_") and f.endswith(".json")
+        ]
+        
+        if not audit_files:
+            raise HTTPException(
+                status_code=404, 
+                detail="No audit results found for this address"
+            )
+        
+        latest_file = sorted(audit_files, reverse=True)[0]
+        file_path = os.path.join(audit_results_dir, latest_file)
+        
+        with open(file_path, 'r', encoding='utf-8') as f:
+            audit_data = json.load(f)
+        
+        # Extract compliance report
+        if "compliance_report" not in audit_data:
+            raise HTTPException(
+                status_code=404,
+                detail="Compliance report not available for this audit"
+            )
+        
+        return audit_data["compliance_report"]
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error retrieving compliance report: {str(e)}"
+        )
+
+@app.get("/satgas-pasti-report/{address}")
+def generate_satgas_pasti_report(address: str):
+    """Generate official Satgas PASTI report format"""
+    
+    try:
+        # Get compliance report first
+        compliance_data = get_compliance_report(address)
+        
+        if not compliance_data["satgas_pasti_report_required"]:
+            return {
+                "report_required": False,
+                "message": "No violations requiring Satgas PASTI reporting found"
+            }
+        
+        # Generate official report format
+        report = {
+            "report_header": {
+                "report_id": f"PASTI-{address[:10]}-{datetime.now().strftime('%Y%m%d')}",
+                "report_date": datetime.now().isoformat(),
+                "reporting_entity": "AutoSentinel Security Platform",
+                "contract_address": address,
+                "report_type": "CRYPTOCURRENCY_FRAUD_DETECTION"
+            },
+            "violation_summary": {
+                "total_violations": compliance_data["total_violations"],
+                "legal_risk_score": compliance_data["legal_risk_score"],
+                "compliance_status": compliance_data["compliance_status"],
+                "immediate_action_required": any(
+                    v["compliance_action"] == "IMMEDIATE_BLOCK" 
+                    for v in compliance_data["violations"]
+                )
+            },
+            "detailed_violations": compliance_data["violations"],
+            "recommended_actions": compliance_data["recommended_actions"],
+            "supporting_evidence": {
+                "technical_analysis_available": True,
+                "behavioral_analysis_available": True,
+                "blockchain_transaction_data": True
+            }
+        }
+        
+        return report
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error generating Satgas PASTI report: {str(e)}"
+        )
 
 if __name__ == "__main__":
     import uvicorn
