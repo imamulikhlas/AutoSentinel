@@ -21,6 +21,13 @@ export interface SecurityMetrics {
   contract_age_days: number
   transaction_count: number
   unique_users: number
+  // Fitur baru Indonesian Crime Detection
+  indonesia_crime_risk: number
+  indonesia_targeting_detected: boolean
+  legal_risk_score: number
+  regulatory_violations_count: number
+  satgas_pasti_report_required: boolean
+  compliance_status: "COMPLIANT" | "NON_COMPLIANT" | "UNDER_REVIEW"
 }
 
 export interface ContractInfo {
@@ -75,6 +82,9 @@ export interface AuditData {
   ownership_analysis: OwnershipAnalysis
   trading_analysis: TradingAnalysis
   social_presence: SocialPresence
+  // Fitur baru
+  indonesian_crime_analysis: IndonesianCrimeAnalysis
+  compliance_report: ComplianceReport
 }
 
 export interface HistoryItem {
@@ -86,4 +96,50 @@ export interface HistoryItem {
 export interface ToastMessage {
   type: "success" | "error" | "info"
   message: string
+}
+
+export interface IndonesianCrimeEvidence {
+  crime_type: string
+  risk_score: number
+  confidence: number
+  evidence: string[]
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
+  regulatory_violation: string
+}
+
+export interface IndonesianCrimeAnalysis {
+  overall_crime_risk: number
+  is_targeting_indonesia: boolean
+  detected_crimes: IndonesianCrimeEvidence[]
+  indonesian_evidence: string[]
+  regulatory_violations: string[]
+  satgas_pasti_report_needed: boolean
+  ojk_compliance_status: "COMPLIANT" | "NON_COMPLIANT" | "UNDER_REVIEW"
+  recommended_actions: string[]
+  indonesian_behavior_score: number
+  timezone_analysis: Record<string, any>
+  exchange_interactions: Record<string, any>
+  structuring_detected: boolean
+}
+
+export interface ComplianceViolation {
+  violation_type: string
+  law_article: string
+  penalty_description: string
+  fine_amount: string
+  enforcement_agency: string
+  severity_level: "RINGAN" | "SEDANG" | "BERAT"
+  satgas_pasti_priority: boolean
+  compliance_action: "MONITOR" | "INVESTIGATE" | "IMMEDIATE_BLOCK"
+}
+
+export interface ComplianceReport {
+  contract_address: string
+  scan_timestamp: string
+  total_violations: number
+  violations: ComplianceViolation[]
+  compliance_status: "COMPLIANT" | "NON_COMPLIANT" | "UNDER_REVIEW"
+  satgas_pasti_report_required: boolean
+  recommended_actions: string[]
+  legal_risk_score: number
 }

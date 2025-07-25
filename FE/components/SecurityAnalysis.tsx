@@ -6,6 +6,7 @@ import { SampleContracts } from "./SampleContracts"
 import { SmoothTransition } from "./SmoothTransition"
 import { InteractiveCard } from "./InteractiveCard"
 import { SmoothButton } from "./SmoothButton"
+import NetworkSelect from "./NetworkSelect"
 
 interface SecurityAnalysisProps {
   address: string
@@ -114,7 +115,7 @@ export const SecurityAnalysis = ({
           </SmoothTransition>
 
           {/* Enhanced Feature Grid */}
-          <SmoothTransition delay={200}>
+          {/* <SmoothTransition delay={200}>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
               {[
                 {
@@ -160,7 +161,7 @@ export const SecurityAnalysis = ({
                 </SmoothTransition>
               ))}
             </div>
-          </SmoothTransition>
+          </SmoothTransition> */}
 
           <div className="space-y-6 sm:space-y-8">
             <SmoothTransition delay={600}>
@@ -211,31 +212,9 @@ export const SecurityAnalysis = ({
               </div>
             </SmoothTransition>
 
-            <SmoothTransition delay={700}>
-              <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-3 sm:mb-4 transition-colors duration-300 hover:text-white">
-                  Blockchain Network
-                </label>
-                <select
-                  value={chain}
-                  onChange={(e) => setChain(e.target.value)}
-                  className="w-full px-4 sm:px-6 py-4 sm:py-5 bg-gray-900/50 border-gray-700/50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 text-white text-base sm:text-lg backdrop-blur-xl hover:border-gray-600/50 hover:shadow-lg"
-                >
-                  <option value="ethereum" className="bg-gray-900">
-                    🔷 Ethereum Mainnet
-                  </option>
-                  <option value="polygon" className="bg-gray-900">
-                    🟣 Polygon
-                  </option>
-                  <option value="bsc" className="bg-gray-900">
-                    🟡 Binance Smart Chain
-                  </option>
-                  <option value="arbitrum" className="bg-gray-900">
-                    🔵 Arbitrum
-                  </option>
-                </select>
-              </div>
-            </SmoothTransition>
+            <NetworkSelect chain={chain} setChain={setChain} />
+            {/* <SmoothTransition delay={700} direction="down">
+            </SmoothTransition> */}
 
             <SmoothTransition delay={800}>
               <SmoothButton
