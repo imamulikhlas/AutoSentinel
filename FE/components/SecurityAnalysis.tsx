@@ -115,7 +115,7 @@ export const SecurityAnalysis = ({
           </SmoothTransition>
 
           {/* Enhanced Feature Grid */}
-          <SmoothTransition delay={200}>
+          {/* <SmoothTransition delay={200}>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
               {[
                 {
@@ -161,7 +161,7 @@ export const SecurityAnalysis = ({
                 </SmoothTransition>
               ))}
             </div>
-          </SmoothTransition>
+          </SmoothTransition> */}
 
           <div className="space-y-6 sm:space-y-8">
             <SmoothTransition delay={600}>
@@ -212,9 +212,9 @@ export const SecurityAnalysis = ({
               </div>
             </SmoothTransition>
 
-            <SmoothTransition delay={700}>
-  <NetworkSelect chain={chain} setChain={setChain} />
-</SmoothTransition>
+            <NetworkSelect chain={chain} setChain={setChain} />
+            {/* <SmoothTransition delay={700} direction="down">
+            </SmoothTransition> */}
 
             <SmoothTransition delay={800}>
               <SmoothButton
