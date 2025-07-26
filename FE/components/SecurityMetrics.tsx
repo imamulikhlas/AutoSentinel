@@ -248,11 +248,11 @@ export const SecurityMetrics = ({ auditData }: SecurityMetricsProps) => {
                   <span className="text-orange-200 text-sm font-medium">Legal Risk</span>
                   <TrendingUp className="w-4 h-4 text-orange-400" />
                 </div>
-                <div className="text-2xl font-bold text-orange-400">{security_metrics.legal_risk_score}/20</div>
+                <div className="text-2xl font-bold text-orange-400">{security_metrics.legal_risk_score}/100</div>
                 <div className="mt-2 bg-orange-800/30 rounded-full h-2">
                   <div
                     className="h-2 rounded-full bg-orange-400 transition-all duration-1000"
-                    style={{ width: `${(security_metrics.legal_risk_score / 20) * 100}%` }}
+                    style={{ width: `${(security_metrics.legal_risk_score / 100) * 100}%` }}
                   />
                 </div>
               </div>

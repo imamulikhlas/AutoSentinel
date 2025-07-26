@@ -138,7 +138,7 @@ export const ComplianceReport = ({ auditData, showToast }: ComplianceReportProps
               <h4 className="text-white font-semibold">Legal Risk Score</h4>
               <FileText className="w-5 h-5 text-orange-400" />
             </div>
-            <div className="text-3xl font-bold text-orange-400">{reportToUse.legal_risk_score}/20</div>
+            <div className="text-3xl font-bold text-orange-400">{reportToUse.legal_risk_score}/100</div>
           </div>
         </div>
 
