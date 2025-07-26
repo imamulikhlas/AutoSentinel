@@ -7,6 +7,7 @@ import requests
 import re
 import time
 import tempfile
+import threading
 from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,7 +18,7 @@ from dotenv import load_dotenv
 from enum import Enum
 
 load_dotenv()
-TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")
+AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
 
 app = FastAPI(title="Smart Contract Security Audit API", version="2.0.0")
 app.add_middleware(
@@ -105,6 +106,22 @@ class SocialPresence(BaseModel):
     github: Optional[str] = None
     discord: Optional[str] = None
     social_score: int = 0
+
+class AISummaryStatus(BaseModel):
+    status: str  # "pending", "completed", "error"
+    summary: Optional[str] = None
+    error_message: Optional[str] = None
+    started_at: str
+    completed_at: Optional[str] = None
+
+class AISummaryResponse(BaseModel):
+    address: str
+    chain: str
+    status: str
+    summary: Optional[str] = None
+    error_message: Optional[str] = None
+    started_at: str
+    completed_at: Optional[str] = None
 
 @dataclass
 class IndonesianCrimeIndicator:
@@ -1033,20 +1050,28 @@ class IndonesianCrimeDetector:
         
         try:
             headers = {
-                "Authorization": f"Bearer {TOGETHER_API_KEY}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "api-key": AZURE_OPENAI_API_KEY
             }
             
             payload = {
-                "model": "Qwen/Qwen2.5-VL-72B-Instruct",
-                "messages": [{"role": "user", "content": prompt}],
-                "max_tokens": 2000,
-                "temperature": 0.3,  # Lower temperature for more consistent analysis
-                "top_p": 0.9
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": [{"type": "text", "text": "You are an AI assistant that helps people find information."}]
+                    },
+                    {
+                        "role": "user", 
+                        "content": [{"type": "text", "text": prompt}]
+                    }
+                ],
+                "temperature": 0.3,
+                "top_p": 0.9,
+                "max_tokens": 2000
             }
             
             response = requests.post(
-                "https://api.together.xyz/v1/chat/completions",
+                "https://imamu-mbzx46yn-japaneast.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2025-01-01-preview",
                 headers=headers,
                 json=payload,
                 timeout=60
@@ -2750,6 +2775,123 @@ def clean_ai_html_output(text: str) -> str:
     
     return text
 
+def save_ai_summary_status(address: str, chain: str, status: str, summary: Optional[str] = None, error_message: Optional[str] = None):
+    """Save AI summary status to JSON file"""
+    ai_summaries_dir = "ai_summaries"
+    os.makedirs(ai_summaries_dir, exist_ok=True)
+    
+    status_data = {
+        "address": address,
+        "chain": chain,
+        "status": status,
+        "summary": summary,
+        "error_message": error_message,
+        "started_at": datetime.now().isoformat() if status == "pending" else None,
+        "completed_at": datetime.now().isoformat() if status in ["completed", "error"] else None
+    }
+    
+    # Load existing if any
+    status_file = os.path.join(ai_summaries_dir, f"{address.lower()}.json")
+    if os.path.exists(status_file):
+        try:
+            with open(status_file, 'r', encoding='utf-8') as f:
+                existing_data = json.load(f)
+                if status != "pending":  # Keep original started_at
+                    status_data["started_at"] = existing_data.get("started_at")
+        except:
+            pass
+    
+    with open(status_file, 'w', encoding='utf-8') as f:
+        json.dump(status_data, f, indent=2, ensure_ascii=False)
+
+def generate_ai_summary_async(
+    address: str, 
+    chain: str,
+    vulnerabilities: List[VulnerabilityDetail],
+    metrics,
+    contract_info,
+    ownership_analysis,
+    trading_analysis,
+    social_presence,
+    contract_stats: Dict = None,
+    indonesian_crime_analysis = None
+):
+    """Background task untuk generate AI summary"""
+    try:
+        print(f"🤖 [DEBUG] Starting async AI summary generation for {address}")
+        print(f"🤖 [DEBUG] Input data - vulnerabilities count: {len(vulnerabilities)}")
+        print(f"🤖 [DEBUG] Input data - trust score: {getattr(metrics, 'trust_score', 'N/A')}")
+        print(f"🤖 [DEBUG] Input data - contract verified: {getattr(contract_info, 'is_verified', 'N/A')}")
+        
+        # Generate AI summary menggunakan fungsi yang sudah ada
+        print(f"🤖 [DEBUG] Calling generate_detailed_summary function...")
+        ai_summary = generate_detailed_summary(
+            vulnerabilities, metrics, contract_info, ownership_analysis, 
+            trading_analysis, social_presence, contract_stats, indonesian_crime_analysis
+        )
+        
+        print(f"🤖 [DEBUG] AI summary generated, length: {len(ai_summary) if ai_summary else 0} characters")
+        
+        # Save completed status
+        print(f"🤖 [DEBUG] Saving completed status to JSON...")
+        save_ai_summary_status(address, chain, "completed", summary=ai_summary)
+        
+        # Update audit file dengan AI summary
+        print(f"🤖 [DEBUG] Updating audit file with AI summary...")
+        update_audit_file_with_ai_summary(address, ai_summary)
+        
+        print(f"✅ [DEBUG] AI summary completed successfully for {address}")
+        
+    except Exception as e:
+        print(f"❌ [DEBUG] AI summary failed for {address}")
+        print(f"❌ [DEBUG] Error details: {str(e)}")
+        print(f"❌ [DEBUG] Error type: {type(e).__name__}")
+        import traceback
+        print(f"❌ [DEBUG] Full traceback:")
+        traceback.print_exc()
+        
+        save_ai_summary_status(address, chain, "error", error_message=str(e))
+
+def update_audit_file_with_ai_summary(address: str, ai_summary: str):
+    """Update latest audit file with AI summary"""
+    try:
+        print(f"📝 [DEBUG] Updating audit file for {address}")
+        
+        audit_results_dir = "audit_results"
+        wallet_short = address[:10]
+        
+        # Find latest audit file
+        audit_files = [
+            f for f in os.listdir(audit_results_dir) 
+            if f.startswith(f"audit_{wallet_short}_") and f.endswith(".json")
+        ]
+        
+        print(f"📝 [DEBUG] Found {len(audit_files)} audit files for {wallet_short}")
+        
+        if audit_files:
+            latest_file = sorted(audit_files, reverse=True)[0]
+            file_path = os.path.join(audit_results_dir, latest_file)
+            print(f"📝 [DEBUG] Latest audit file: {latest_file}")
+            
+            # Load and update
+            with open(file_path, 'r', encoding='utf-8') as f:
+                audit_data = json.load(f)
+            
+            print(f"📝 [DEBUG] Loaded audit data, adding AI summary...")
+            audit_data["ai_summary"] = ai_summary
+            
+            with open(file_path, 'w', encoding='utf-8') as f:
+                json.dump(audit_data, f, indent=2, ensure_ascii=False)
+            
+            print(f"📝 [DEBUG] Successfully updated audit file with AI summary")
+        else:
+            print(f"📝 [DEBUG] No audit files found for {wallet_short}")
+                
+    except Exception as e:
+        print(f"⚠️ [DEBUG] Failed to update audit file: {e}")
+        import traceback
+        traceback.print_exc()    
+
 def generate_detailed_summary(
     vulnerabilities: List[VulnerabilityDetail],
     metrics: SecurityMetrics,
@@ -2949,16 +3091,19 @@ Remember: Your credibility as an expert depends on being consistent with the tec
 
     try:
         headers = {
-            "Authorization": f"Bearer {TOGETHER_API_KEY}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "api-key": AZURE_OPENAI_API_KEY
         }
         
         payload = {
-            "model": "meta-llama/Llama-3.2-90B-Vision-Instruct-Turbo",
             "messages": [
                 {
+                    "role": "system",
+                    "content": [{"type": "text", "text": "You are an AI assistant that helps people find information."}]
+                },
+                {
                     "role": "user", 
-                    "content": prompt
+                    "content": [{"type": "text", "text": prompt}]
                 }
             ],
             "max_tokens": 3500,
@@ -2967,7 +3112,7 @@ Remember: Your credibility as an expert depends on being consistent with the tec
         }
         
         response = requests.post(
-            "https://api.together.xyz/v1/chat/completions",
+            "https://imamu-mbzx46yn-japaneast.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2025-01-01-preview",
             headers=headers,
             json=payload,
             timeout=60
@@ -3386,11 +3531,39 @@ def audit_contract(data: ContractRequest):
             metrics, contract_info, ownership_analysis, trading_analysis, trust_score, contract_stats
         )
         
-        # 8. ✨ Generate comprehensive AI analysis
-        print("🤖 Generating AI security analysis...")
-        ai_summary = generate_detailed_summary(
-            vulnerabilities, metrics, contract_info, ownership_analysis, trading_analysis, social_presence, contract_stats, indonesian_crime_analysis  
+        # 8. ✨ Set AI summary as pending dan start background task
+        print("🤖 Starting AI summary generation in background...")
+        
+        # Save pending status
+        save_ai_summary_status(address, chain, "pending")
+        
+        # Set temporary AI summary
+        ai_summary = """
+        <div class="space-y-6 text-gray-200 text-base leading-relaxed">
+          <section class="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 rounded-xl p-6 border-blue-400/30">
+            <div class="flex items-center mb-6">
+              <span class="text-3xl mr-4">🤖</span>
+              <h2 class="text-2xl font-bold text-blue-300">AI Analysis In Progress</h2>
+            </div>
+            <div class="bg-blue-500/20 rounded-lg p-5 border-blue-400/30">
+              <p class="text-blue-200 text-lg">
+                Our AI security expert is analyzing your contract. This usually takes 30-60 seconds.
+                Please check back shortly for detailed insights.
+              </p>
+            </div>
+          </section>
+        </div>
+        """
+        
+        # Start background AI generation
+        ai_thread = threading.Thread(
+            target=generate_ai_summary_async,
+            args=(address, chain, vulnerabilities, metrics, contract_info, 
+                  ownership_analysis, trading_analysis, social_presence, 
+                  contract_stats, indonesian_crime_analysis)
         )
+        ai_thread.daemon = True
+        ai_thread.start()
         
         recommendations = generate_recommendations(vulnerabilities, contract_info, ownership_analysis)
         gas_hints = generate_gas_optimization_hints(vulnerabilities)
@@ -3474,6 +3647,32 @@ def audit_contract(data: ContractRequest):
                 print(f"🗑️ Cleaned up temporary slither file: {temp_slither_file}")
             except Exception as cleanup_error:
                 print(f"⚠️ Cleanup warning: {cleanup_error}")
+
+@app.get("/ai-summary/{address}", response_model=AISummaryResponse)
+def get_ai_summary_status(address: str, chain: str = "ethereum"):
+    """Get AI summary generation status"""
+    try:
+        ai_summaries_dir = "ai_summaries"
+        status_file = os.path.join(ai_summaries_dir, f"{address.lower()}.json")
+        
+        if not os.path.exists(status_file):
+            raise HTTPException(
+                status_code=404,
+                detail="No AI summary generation found for this address"
+            )
+        
+        with open(status_file, 'r', encoding='utf-8') as f:
+            status_data = json.load(f)
+        
+        return AISummaryResponse(**status_data)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error retrieving AI summary status: {str(e)}"
+        )
 
 @app.get("/load-audit-file", response_model=AuditResult)
 def load_audit_file(path: str, address: Optional[str] = None, chain: Optional[str] = "ethereum"):
