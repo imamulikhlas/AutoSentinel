@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 from enum import Enum
 
 load_dotenv()
-TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")
+AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
 
 app = FastAPI(title="Smart Contract Security Audit API", version="2.0.0")
 app.add_middleware(
@@ -1033,20 +1033,28 @@ class IndonesianCrimeDetector:
         
         try:
             headers = {
-                "Authorization": f"Bearer {TOGETHER_API_KEY}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "api-key": AZURE_OPENAI_API_KEY
             }
             
             payload = {
-                "model": "Qwen/Qwen2.5-VL-72B-Instruct",
-                "messages": [{"role": "user", "content": prompt}],
-                "max_tokens": 2000,
-                "temperature": 0.3,  # Lower temperature for more consistent analysis
-                "top_p": 0.9
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": [{"type": "text", "text": "You are an AI assistant that helps people find information."}]
+                    },
+                    {
+                        "role": "user", 
+                        "content": [{"type": "text", "text": prompt}]
+                    }
+                ],
+                "temperature": 0.3,
+                "top_p": 0.9,
+                "max_tokens": 2000
             }
             
             response = requests.post(
-                "https://api.together.xyz/v1/chat/completions",
+                "https://imamu-mbzx46yn-japaneast.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2025-01-01-preview",
                 headers=headers,
                 json=payload,
                 timeout=60
@@ -2949,16 +2957,19 @@ Remember: Your credibility as an expert depends on being consistent with the tec
 
     try:
         headers = {
-            "Authorization": f"Bearer {TOGETHER_API_KEY}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "api-key": AZURE_OPENAI_API_KEY
         }
         
         payload = {
-            "model": "meta-llama/Llama-3.2-90B-Vision-Instruct-Turbo",
             "messages": [
                 {
+                    "role": "system",
+                    "content": [{"type": "text", "text": "You are an AI assistant that helps people find information."}]
+                },
+                {
                     "role": "user", 
-                    "content": prompt
+                    "content": [{"type": "text", "text": prompt}]
                 }
             ],
             "max_tokens": 3500,
@@ -2967,7 +2978,7 @@ Remember: Your credibility as an expert depends on being consistent with the tec
         }
         
         response = requests.post(
-            "https://api.together.xyz/v1/chat/completions",
+            "https://imamu-mbzx46yn-japaneast.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2025-01-01-preview",
             headers=headers,
             json=payload,
             timeout=60
