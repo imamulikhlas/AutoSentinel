@@ -3194,12 +3194,21 @@ def generate_data_consistent_fallback(
 
       <section class="bg-gradient-to-r from-orange-600/20 to-amber-600/20 rounded-xl p-6 border-orange-400/30">
         <div class="flex items-center mb-6">
-          <span class="text-3xl mr-4">⚠️</span>
+          <span class="text-3xl mr-4">
+            <svg class="w-8 h-8 mr-4 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+            </svg>
+          </span>
           <h2 class="text-2xl font-bold text-orange-300">EXPERT SECURITY ASSESSMENT</h2>
         </div>
         
         <div class="bg-orange-500/20 rounded-lg p-5 border-orange-400/30 mb-6">
-          <h3 class="text-orange-300 font-bold text-xl mb-3">📊 MEDIUM RISK CONFIRMED</h3>
+          <h3 class="text-orange-300 font-bold text-xl mb-3">
+            <svg class="w-6 h-6 inline mr-2 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M3 3v18h18V3H3zm16 16H5V5h14v14zm-2-8h-4V7h4v4zm0 6h-4v-4h4v4z"/>
+            </svg>
+            MEDIUM RISK CONFIRMED
+            </h3>
           <p class="text-gray-300 leading-relaxed text-lg">
             {risk_explanation}
           </p>
@@ -3207,14 +3216,24 @@ def generate_data_consistent_fallback(
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="bg-black/40 rounded-lg p-4 border-orange-400/20">
-            <h4 class="text-orange-300 font-bold mb-2">🎯 Security Concerns</h4>
+            <h4 class="text-orange-300 font-bold mb-2">
+            <svg class="w-5 h-5 inline mr-2 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            Security Concerns
+            </h4>
             <p class="text-gray-300 text-sm">
               {f'{len(high_vulns)} high-severity issue detected' if len(high_vulns) > 0 else 'No high-severity issues detected'}: {high_vulns[0].type if high_vulns else 'Minor security concerns only'}
             </p>
           </div>
           
           <div class="bg-black/40 rounded-lg p-4 border-orange-400/20">
-            <h4 class="text-orange-300 font-bold mb-2">⏰ Maturity Assessment</h4>
+            <h4 class="text-orange-300 font-bold mb-2">
+            <svg class="w-5 h-5 inline mr-2 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm4.2 14.2L11 13V7h1.5v5.2l4.5 2.7-.8 1.3z"/>
+            </svg>
+            Maturity Assessment
+            </h4>
             <p class="text-gray-300 text-sm">
               Contract age: <strong>{contract_age} hari</strong> = {'Very new protocol requiring careful observation' if contract_age < 7 else 'Young protocol with limited track record' if contract_age < 30 else 'Maturing protocol with growing track record'}
             </p>
@@ -3224,16 +3243,30 @@ def generate_data_consistent_fallback(
 
       <section class="bg-gradient-to-r from-blue-600/20 to-indigo-600/20 rounded-xl p-6 border-blue-400/30">
         <div class="flex items-center mb-6">
-          <span class="text-3xl mr-4">🔬</span>
+          <span class="text-3xl mr-4">
+            <svg class="w-8 h-8 mr-4 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"/>
+            </svg>
+          </span>
           <h2 class="text-2xl font-bold text-blue-300">Technical Analysis</h2>
         </div>
         
         <div class="space-y-4">
           <div class="bg-black/40 rounded-lg p-5 border-blue-400/20">
-            <h3 class="text-blue-300 font-bold text-lg mb-3">⚖️ Risk-Benefit Analysis</h3>
+            <h3 class="text-blue-300 font-bold text-lg mb-3">
+            <svg class="w-6 h-6 inline mr-2 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            Risk-Benefit Analysis
+            </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <h4 class="text-green-300 font-bold mb-2">✅ Positive Factors</h4>
+                <h4 class="text-green-300 font-bold mb-2">
+                <svg class="w-5 h-5 inline mr-2 text-green-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                Positive Factors
+                </h4>
                 <ul class="text-gray-300 text-sm space-y-1">
                   {f'<li>• Contract verified on blockchain explorer</li>' if contract_info.is_verified else ''}
                   {f'<li>• No honeypot mechanism detected</li>' if not trading_analysis.is_honeypot else ''}
@@ -3242,7 +3275,12 @@ def generate_data_consistent_fallback(
                 </ul>
               </div>
               <div>
-                <h4 class="text-orange-300 font-bold mb-2">⚠️ Concern Areas</h4>
+                <h4 class="text-orange-300 font-bold mb-2">
+                <svg class="w-5 h-5 inline mr-2 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                </svg>
+                Concern Areas
+                </h4>
                 <ul class="text-gray-300 text-sm space-y-1">
                   {f'<li>• {len(high_vulns)} high-severity vulnerability: {high_vulns[0].type if high_vulns else "None"}</li>' if high_vulns else ''}
                   <li>• Very young contract ({contract_age} days old)</li>
@@ -3257,21 +3295,35 @@ def generate_data_consistent_fallback(
 
       <section class="bg-gradient-to-r from-purple-600/20 to-indigo-600/20 rounded-xl p-6 border-purple-400/30">
         <div class="flex items-center mb-6">
-          <span class="text-3xl mr-4">🎯</span>
+          <span class="text-3xl mr-4">
+            <svg class="w-8 h-8 mr-4 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          </span>
           <h2 class="text-2xl font-bold text-purple-300">Expert Recommendations</h2>
         </div>
         
         <div class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="bg-black/40 rounded-lg p-5 border-purple-400/20">
-              <h3 class="text-purple-300 font-bold text-lg mb-3">🏢 For Institutional Use</h3>
+                <h3 class="text-purple-300 font-bold text-lg mb-3">
+                <svg class="w-6 h-6 inline mr-2 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10z"/>
+                </svg>
+                For Institutional Use
+                </h3>
               <p class="text-gray-300 leading-relaxed">
                 {'Enhanced due diligence required. Consider for experimental allocation with strict position limits (max 0.5% portfolio).' if metrics.trust_score >= 50 else 'Not recommended for institutional use due to risk profile.'}
               </p>
             </div>
             
             <div class="bg-black/40 rounded-lg p-5 border-purple-400/20">
-              <h3 class="text-purple-300 font-bold text-lg mb-3">👤 For Retail Users</h3>
+                <h3 class="text-purple-300 font-bold text-lg mb-3">
+                <svg class="w-6 h-6 inline mr-2 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+                For Retail Users
+                </h3>
               <p class="text-gray-300 leading-relaxed">
                 {'Suitable for experienced users with proper risk management. Start with small test transactions.' if metrics.trust_score >= 40 else 'High risk - only for expert users who fully understand the implications.'}
               </p>
@@ -3279,7 +3331,12 @@ def generate_data_consistent_fallback(
           </div>
           
           <div class="bg-gray-800/50 rounded-lg p-4 border-gray-600/30">
-            <h4 class="text-gray-300 font-bold mb-2">🔧 Practical Usage Guidelines:</h4>
+            <h4 class="text-gray-300 font-bold mb-2">
+            <svg class="w-5 h-5 inline mr-2 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>
+            </svg>
+            Practical Usage Guidelines:
+            </h4>
             <ul class="text-gray-300 text-sm space-y-1">
               <li>• Start with minimal test transactions to verify functionality</li>
               <li>• Monitor contract behavior closely during initial weeks</li>
@@ -3293,7 +3350,11 @@ def generate_data_consistent_fallback(
 
       <section class="bg-gradient-to-r from-gray-700/20 to-gray-800/20 rounded-xl p-6 border-gray-600/30">
         <div class="flex items-center mb-6">
-          <span class="text-3xl mr-4">📋</span>
+          <span class="text-3xl mr-4">
+            <svg class="w-8 h-8 mr-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+            </svg>
+          </span>
           <h2 class="text-2xl font-bold text-white">Expert Final Assessment</h2>
         </div>
         
