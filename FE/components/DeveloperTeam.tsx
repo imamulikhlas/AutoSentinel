@@ -13,19 +13,20 @@ export const DeveloperTeam = () => {
           name: "Farel Imam Maulana",
           role: "AI/ML Engineer",
           speciality: "Machine Learning & Security",
-          avatar: "/placeholder.svg?height=120&width=120",
+          avatar: "/teams/farel.webp?height=120&width=120",
           bio: "AI enthusiast specializing in security analysis and threat detection algorithms. Building the future of smart contract security.",
           skills: ["Python", "TensorFlow", "Security Analysis", "Blockchain"],
           social: {
-            github: "https://github.com/sarahchen",
+            github: "https://github.com/frl-im",
             linkedin: "https://linkedin.com/in/farel-imam-maulana-5a2622355",
+            email: "akunx368@gmail.com",
           },
           gradient: "from-green-400 to-emerald-500",
           bgGradient: "from-green-500/10 to-emerald-500/10",
           borderColor: "border-green-500/30",
           teamRole : "🧑‍🚀Astro-F",
         },
-                {
+        {
             name: "M Imamul Ikhlas",
             role: "Full Stack Developer",
             speciality: "Next Js, Python, Blockchain",
