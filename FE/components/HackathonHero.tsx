@@ -48,7 +48,7 @@ export const HackathonHero = () => {
           </div>
           <div className="text-left font-space-grotesk">
             <p className="text-orange-400 font-bold text-lg">BI - OJK HACKATHON 2025</p>
-            <p className="text-orange-300 text-sm">🏆 INNOVATION IN FINTECH SECURITY</p>
+            <p className="text-orange-300 text-sm">⭐ INNOVATION IN FINTECH SECURITY</p>
           </div>
         </div>
 
