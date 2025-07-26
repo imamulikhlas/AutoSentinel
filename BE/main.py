@@ -3837,68 +3837,136 @@ def load_audit_file(path: str, address: Optional[str] = None, chain: Optional[st
 
 @app.get("/audit-history/{address}")
 def get_audit_history(address: str):
-    """✅ MODIFIED: Get audit history - now looks for complete audit files"""
+    """✅ FIXED: Get audit history with case-insensitive matching"""
+    
     audit_results_dir = "audit_results"
+    
     if not os.path.exists(audit_results_dir):
-        return {"history": []}
+        print(f"❌ [DEBUG] Directory does not exist: {audit_results_dir}")
+        return {"history": [], "debug": f"Directory {audit_results_dir} not found"}
     
-    wallet_short = address[:10]
+    # List all files in directory
+    try:
+        all_files = os.listdir(audit_results_dir)
+    except Exception as e:
+        print(f"❌ [DEBUG] Failed to list directory: {e}")
+        return {"history": [], "debug": f"Failed to list directory: {str(e)}"}
     
-    # Look for complete audit files (new format)
-    audit_files = [
-        f for f in os.listdir(audit_results_dir) 
-        if f.startswith(f"audit_{wallet_short}_") and f.endswith(".json")
-    ]
+    # ✨ FIX: Use lowercase for pattern matching
+    wallet_short = address[:10].lower()  # Convert to lowercase
     
-    # Also look for legacy slither files if no new audit files found
-    legacy_files = [
-        f for f in os.listdir(audit_results_dir) 
-        if f.startswith(f"slither_{wallet_short}_") and f.endswith(".json") and not f.startswith("slither_temp_")
-    ]
+    # Look for complete audit files (new format) - case insensitive
+    audit_files = []
+    legacy_files = []
     
+    for f in all_files:
+        f_lower = f.lower()  # Convert filename to lowercase for comparison
+        
+        # Check audit files
+        if f_lower.startswith(f"audit_{wallet_short}_") and f_lower.endswith(".json"):
+            audit_files.append(f)  # Keep original filename
+            
+        # Check legacy files  
+        elif f_lower.startswith(f"slither_{wallet_short}_") and f_lower.endswith(".json") and not f_lower.startswith("slither_temp_"):
+            legacy_files.append(f)  # Keep original filename
+        
     history = []
+    processing_errors = []
     
     # Process complete audit files first (preferred)
     for file in sorted(audit_files, reverse=True)[:10]:
         file_path = os.path.join(audit_results_dir, file)
+        
         try:
+            # Check file exists and readable
+            if not os.path.exists(file_path):
+                error_msg = f"File not found: {file_path}"
+                print(f"❌ [DEBUG] {error_msg}")
+                processing_errors.append(error_msg)
+                continue
+            
+            # Check file size
+            file_size = os.path.getsize(file_path)
+            
+            if file_size == 0:
+                error_msg = f"Empty file: {file}"
+                print(f"❌ [DEBUG] {error_msg}")
+                processing_errors.append(error_msg)
+                continue
+            
+            # Try to parse JSON
             with open(file_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
                 
                 if "security_metrics" in data:  # Complete audit result
-                    history.append({
+                    history_item = {
                         "timestamp": data.get("audit_timestamp", ""),
                         "risk_level": data.get("risk_level", "Unknown"),
                         "trust_score": data.get("risk_score", 0),
                         "total_issues": data.get("security_metrics", {}).get("total_issues", 0),
                         "file_path": file_path,
                         "file_type": "complete_audit"
-                    })
+                    }
+                    history.append(history_item)
+                else:
+                    error_msg = f"Invalid audit format (missing security_metrics): {file}"
+                    print(f"⚠️ [DEBUG] {error_msg}")
+                    processing_errors.append(error_msg)
+                    
+        except json.JSONDecodeError as e:
+            error_msg = f"JSON decode error in {file}: {str(e)}"
+            print(f"❌ [DEBUG] {error_msg}")
+            processing_errors.append(error_msg)
+            continue
         except Exception as e:
-            print(f"Error reading audit file {file}: {e}")
+            error_msg = f"Error reading {file}: {str(e)}"
+            print(f"❌ [DEBUG] {error_msg}")
+            processing_errors.append(error_msg)
             continue
     
     # Add legacy files if no complete audits found
     if not history:
+        
         for file in sorted(legacy_files, reverse=True)[:5]:
             file_path = os.path.join(audit_results_dir, file)
+            
             try:
                 with open(file_path, 'r') as f:
                     data = json.load(f)
+                    
                     issues_count = len(data.get("results", {}).get("detectors", []))
-                    history.append({
+                    history_item = {
                         "timestamp": file.split('_')[-1].replace('.json', ''),
                         "risk_level": "Unknown",
                         "trust_score": 0,
                         "total_issues": issues_count,
                         "file_path": file_path,
                         "file_type": "legacy_slither"
-                    })
+                    }
+                    history.append(history_item)
+                    
             except Exception as e:
-                print(f"Error reading legacy file {file}: {e}")
+                error_msg = f"Error reading legacy file {file}: {str(e)}"
+                print(f"❌ [DEBUG] {error_msg}")
+                processing_errors.append(error_msg)
                 continue
     
-    return {"address": address, "history": history}
+
+    result = {
+        "address": address, 
+        "history": history,
+        "debug_info": {
+            "audit_files_found": len(audit_files),
+            "legacy_files_found": len(legacy_files),
+            "processing_errors": processing_errors,
+            "total_files_in_dir": len(all_files),
+            "wallet_short": wallet_short,
+            "original_address": address,
+            "case_sensitive_fix_applied": True
+        }
+    }
+    
+    return result
 
 @app.get("/compliance-report/{address}")
 def get_compliance_report(address: str, chain: str = "ethereum"):

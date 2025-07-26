@@ -105,27 +105,27 @@ export const LandingPage = ({ onNavigate, user, onLogout }: LandingPageProps) =>
                 gradient: "from-green-400 to-blue-500",
                 glowEffect: "blue" as const,
               },
-              {
-                icon: BarChart3,
-                title: "Analytics Dashboard",
-                description: "Detailed insights, usage statistics, and security trends visualization",
-                gradient: "from-blue-400 to-cyan-500",
-                glowEffect: "blue" as const,
-              },
-              {
-                icon: Lock,
-                title: "Enterprise Security",
-                description: "Bank-grade security with API key management and rate limiting",
-                gradient: "from-red-400 to-pink-500",
-                glowEffect: "orange" as const,
-              },
-              {
-                icon: Globe,
-                title: "Multi-Chain Support",
-                description: "Support for Ethereum, Polygon, BSC, Arbitrum, and more blockchains",
-                gradient: "from-indigo-400 to-purple-500",
-                glowEffect: "purple" as const,
-              },
+              // {
+              //   icon: BarChart3,
+              //   title: "Analytics Dashboard",
+              //   description: "Detailed insights, usage statistics, and security trends visualization",
+              //   gradient: "from-blue-400 to-cyan-500",
+              //   glowEffect: "blue" as const,
+              // },
+              // {
+              //   icon: Lock,
+              //   title: "Enterprise Security",
+              //   description: "Bank-grade security with API key management and rate limiting",
+              //   gradient: "from-red-400 to-pink-500",
+              //   glowEffect: "orange" as const,
+              // },
+              // {
+              //   icon: Globe,
+              //   title: "Multi-Chain Support",
+              //   description: "Support for Ethereum, Polygon, BSC, Arbitrum, and more blockchains",
+              //   gradient: "from-indigo-400 to-purple-500",
+              //   glowEffect: "purple" as const,
+              // },
             ].map(({ icon: Icon, title, description, gradient, glowEffect }, i) => (
               <SmoothTransition key={i} delay={400 + i * 100}>
                 <InteractiveCard
